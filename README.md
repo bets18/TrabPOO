@@ -1,10 +1,10 @@
 # Herdeiros de Khan
 
-Trabalho desenvolvido para a disciplina de **Programação Orientada a Objetos (POO)** no semestre de **2026.2**.
+Trabalho desenvolvido para a disciplina de Programação Orientada a Objetos (POO) no semestre 2026.2.
 
-Este projeto implementa a estrutura base e as regras do jogo de tabuleiro *Herdeiros de Khan*, focando fortemente na aplicação de conceitos de POO, encapsulamento, padrão de arquitetura *Façade* e criação de testes automatizados com JUnit 4.
+Esse projeto é uma implementação em Java do jogo de tabuleiro Herdeiros de Khan. Aqui colocamos em prática o que aprendemos sobre orientação a objetos, como encapsulamento, o padrão Façade e testes unitários usando JUnit 4.
 
-## Membros do Grupo
+## Grupo
 * Lis Almeida
 * Rafaela Bessa
 * Davi Rangel
