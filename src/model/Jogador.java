@@ -31,7 +31,7 @@ class Jogador {
         tributos.put(tipo, tributos.get(tipo) + quantidade);
     }
 
-    // Retorna false (sem alterar nada) se o jogador não tiver peças suficientes
+    // retorna false (sem alterar nada) se o jogador não tiver peças suficientes
     boolean gastarTributos(TipoTributo tipo, int quantidade) {
         int atual = tributos.get(tipo);
         if (quantidade < 0 || atual < quantidade) {
@@ -61,7 +61,7 @@ class Jogador {
         if (yurtsNoEstoque == 0) {
             return false;
         }
-        yurtsNoEstoque--;
+        yurtsNoEstoque;
         return true;
     }
 

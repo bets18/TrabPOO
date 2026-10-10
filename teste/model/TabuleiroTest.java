@@ -41,7 +41,7 @@ public class TabuleiroTest {
         Tabuleiro tabuleiro = new Tabuleiro();
         tabuleiro.adicionarLocal(new Cidade("Samarcanda", Regiao.PERSIA));
 
-        // Os locais são identificados pelo nome na API, então nomes repetidos são proibidos
+        // os locais são identificados pelo nome na API, então nomes repetidos são proibidos
         tabuleiro.adicionarLocal(new Parada("Samarcanda", Regiao.PERSIA, TipoParada.SIMPLES));
     }
 }

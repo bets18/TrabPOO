@@ -3,7 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-// Espaço de movimento dos peões
+// espaço de movimento dos peões
 class Parada extends Local {
     private final TipoParada tipo;
     private final List<Jogador> peoes = new ArrayList<>();

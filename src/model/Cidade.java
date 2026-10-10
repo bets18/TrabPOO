@@ -3,7 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-// Fonte dos tesouros. Só pode ser atacada depois de revelada e enquanto não for conquistada.
+// fonte dos tesouros. Só pode ser atacada depois de revelada e enquanto não for conquistada.
 class Cidade extends Local {
     static final int TESOUROS_AO_REVELAR = 4;
 
@@ -15,7 +15,7 @@ class Cidade extends Local {
         super(nome, regiao);
     }
 
-    // Revela a cidade e coloca nela as 4 primeiras peças da pilha de tesouros
+    // revela a cidade e coloca nela as 4 primeiras peças da pilha de tesouros
     void revelar(List<TipoTesouro> pilhaDeTesouros) {
         revelada = true;
         for (int i = 0; i < TESOUROS_AO_REVELAR && !pilhaDeTesouros.isEmpty(); i++) {

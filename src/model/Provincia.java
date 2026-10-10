@@ -26,7 +26,7 @@ class Provincia extends Local {
         return quantidade;
     }
 
-    // Retorna false se a província já estiver no máximo (3 peças); nesse caso nada muda
+    // retorna false se a província já estiver no máximo (3 peças); nesse caso nada muda
     boolean adicionarTributo() {
         if (quantidade >= MAX_TRIBUTOS) {
             return false;
@@ -39,7 +39,7 @@ class Provincia extends Local {
         if (quantidade == 0) {
             return false;
         }
-        quantidade--;
+        quantidade;
         return true;
     }
 }

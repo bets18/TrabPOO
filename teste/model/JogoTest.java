@@ -9,9 +9,9 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /*
- * Mapa reduzido usado nos testes:
+ * mapa reduzido usado nos testes:
  *
- *   Karakorum --- P1 --- P2 --- P3(dupla) --- P4
+ *   karakorum  P1  P2  P3(dupla)  P4
  *                  |      |                    |
  *          provEspada  Samarcanda     provMoeda, Bagda
  *
@@ -59,8 +59,8 @@ public class JogoTest {
 
     private Jogo criarJogo(Herdeiro... herdeiros) {
         Jogo jogo = new Jogo(tabuleiro, Arrays.asList(herdeiros));
-        // Pilha "embaralhada" em ordem fixa para o teste ser determinístico:
-        // Samarcanda recebe PELE, FERRO, CARNE, GRAOS
+        // pilha "Embaralhada" em ordem fixa para o teste ser determinístico:
+        // samarcanda recebe PELE, FERRO, CARNE, GRAOS
         List<TipoTesouro> pilha = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             pilha.addAll(Arrays.asList(TipoTesouro.values()));
@@ -69,26 +69,35 @@ public class JogoTest {
         return jogo;
     }
 
-    // ---------------------------------------------------------------- Preparação
+    //  preparação 
 
     @Test(timeout = 2000)
     public void testaSePreparacaoDaUmaMoedaAosDoisPrimeirosEDuasAosDemais() {
         Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI, Herdeiro.JOCHI, Herdeiro.OGEDEI);
 
-        assertEquals("O 1º jogador deveria começar com 1 moeda.", 1, jogo.getJogador(0).getQuantidadeTributo(TipoTributo.MOEDA));
-        assertEquals("O 2º jogador deveria começar com 1 moeda.", 1, jogo.getJogador(1).getQuantidadeTributo(TipoTributo.MOEDA));
-        assertEquals("O 3º jogador deveria começar com 2 moedas.", 2, jogo.getJogador(2).getQuantidadeTributo(TipoTributo.MOEDA));
-        assertEquals("O 4º jogador deveria começar com 2 moedas.", 2, jogo.getJogador(3).getQuantidadeTributo(TipoTributo.MOEDA));
+        assertEquals("Erro: 1º jogador tem que ter 1 moeda", 1, jogo.getJogador(0).getQuantidadeTributo(TipoTributo.MOEDA));
+        assertEquals("Erro: 2º jogador tem que ter 1 moeda", 1, jogo.getJogador(1).getQuantidadeTributo(TipoTributo.MOEDA));
+        assertEquals("Erro: 3º jogador tem que ter 2 moedas", 2, jogo.getJogador(2).getQuantidadeTributo(TipoTributo.MOEDA));
+        assertEquals("Erro: 4º jogador tem que ter 2 moedas", 2, jogo.getJogador(3).getQuantidadeTributo(TipoTributo.MOEDA));
     }
 
     @Test(timeout = 2000)
-    public void testaSePreparacaoPoePeoesEmKarakorumEUmTributoPorProvincia() {
+    public void testaSePreparacaoPoePeoesEmKarakorum() {
         Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        assertSame("Peao devia iniciar em Karakorum", karakorum, jogo.getJogador(1).getPosicao());
+    }
 
-        assertSame("Os peões deveriam começar em Karakorum.", karakorum, jogo.getJogador(1).getPosicao());
-        assertEquals("Cada província deveria começar com 1 peça de tributo.", 1, provYurt.getQuantidade());
-        assertTrue("Samarcanda deveria estar entre as 3 cidades reveladas.", samarcanda.isRevelada());
-        assertFalse("Kiev, a 4ª cidade da pilha, deveria continuar oculta.", kiev.isRevelada());
+    @Test(timeout = 2000)
+    public void testaSePreparacaoColocaUmTributoPorProvincia() {
+        criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        assertEquals("Erro na qtde inicial de tributo", 1, provYurt.getQuantidade());
+    }
+
+    @Test(timeout = 2000)
+    public void testaSePreparacaoRevelaAsTresPrimeirasCidadesDaPilha() {
+        criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        assertTrue("Samarcanda devia estar revelada", samarcanda.isRevelada());
+        assertFalse("Kiev devia continuar oculta", kiev.isRevelada());
     }
 
     @Test(expected = IllegalArgumentException.class, timeout = 2000)
@@ -96,7 +105,7 @@ public class JogoTest {
         criarJogo(Herdeiro.ALTANI);
     }
 
-    // --------------------------------------------------------------------- Mover
+    //  mover 
 
     @Test(timeout = 2000)
     public void testaSeMovimentoFalhaQuandoCaminhoExigeMaisMovimentosQueOsDisponiveis() {
@@ -104,8 +113,8 @@ public class JogoTest {
 
         boolean resultado = jogo.moverPeao(Arrays.asList(p1, p2, p3), 2);
 
-        assertFalse("Ir de Karakorum até P3 exige 3 movimentos, mas só havia 2.", resultado);
-        assertSame("O peão deveria permanecer em Karakorum.", karakorum, jogo.getJogadorDaVez().getPosicao());
+        assertFalse("Move de 3 passos c/ 2 movs devia falhar", resultado);
+        assertSame("Peao n devia sair do lugar", karakorum, jogo.getJogadorDaVez().getPosicao());
     }
 
     @Test(timeout = 2000)
@@ -118,11 +127,11 @@ public class JogoTest {
     @Test(timeout = 2000)
     public void testaSePeaoPassaPorParadaOcupadaMasNaoTerminaNela() {
         Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
-        jogo.moverPeao(Arrays.asList(p1), 1); // ALTANI ocupa P1
+        jogo.moverPeao(Arrays.asList(p1), 1); // aLTANI ocupa P1
         jogo.passarVez();
 
-        assertFalse("CHAGATAI não pode terminar em P1, parada simples ocupada por ALTANI.", jogo.moverPeao(Arrays.asList(p1), 1));
-        assertTrue("CHAGATAI pode passar por P1 e terminar em P2.", jogo.moverPeao(Arrays.asList(p1, p2), 2));
+        assertFalse("Nao pode terminar em parada simples ocupada", jogo.moverPeao(Arrays.asList(p1), 1));
+        assertTrue("Devia poder passar por parada ocupada", jogo.moverPeao(Arrays.asList(p1, p2), 2));
     }
 
     @Test(timeout = 2000)
@@ -131,10 +140,10 @@ public class JogoTest {
         jogo.moverPeao(Arrays.asList(p1, p2, p3), 3);
         jogo.passarVez();
 
-        assertTrue("Uma parada dupla comporta 2 peões.", jogo.moverPeao(Arrays.asList(p1, p2, p3), 3));
+        assertTrue("Parada dupla devia aceitar 2 peoes", jogo.moverPeao(Arrays.asList(p1, p2, p3), 3));
     }
 
-    // Deixa um yurt do ALTANI em P1 e devolve o jogo no turno seguinte dele, em Karakorum
+    // prepara yurt do ALTANI em P1 p/ os testes
     private Jogo criarJogoComYurtDoAltaniEmP1() {
         Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
         jogo.getJogadorDaVez().adicionarTributos(TipoTributo.YURT, 1);
@@ -150,16 +159,16 @@ public class JogoTest {
     public void testaSePularProprioYurtLevaAParadaSeguinteEmUmMovimento() {
         Jogo jogo = criarJogoComYurtDoAltaniEmP1();
 
-        assertTrue("Pulando o próprio yurt em P1, Karakorum -> P2 deveria custar 1 movimento.", jogo.moverPeao(Arrays.asList(p2), 1));
-        assertFalse("P1 foi pulada, então não serve de base para pegar tributo de ProvEspada.", jogo.pegarTributo(provEspada));
+        assertTrue("Pular proprio yurt custa 1 mov", jogo.moverPeao(Arrays.asList(p2), 1));
+        assertFalse("P1 pulada n da tributo", jogo.pegarTributo(provEspada));
     }
 
     @Test(timeout = 2000)
     public void testaSePularYurtEOpcionalPermitindoPararNele() {
         Jogo jogo = criarJogoComYurtDoAltaniEmP1();
 
-        assertTrue("O jogador pode escolher parar em P1 em vez de pular.", jogo.moverPeao(Arrays.asList(p1, p2), 2));
-        assertTrue("P1 foi uma parada feita, então ProvEspada pode ceder tributo.", jogo.pegarTributo(provEspada));
+        assertTrue("Pode escolher parar msm tendo yurt", jogo.moverPeao(Arrays.asList(p1, p2), 2));
+        assertTrue("Parou em P1, entao pega tributo", jogo.pegarTributo(provEspada));
     }
 
     @Test(timeout = 2000)
@@ -170,7 +179,7 @@ public class JogoTest {
         assertFalse("O yurt em P1 é do ALTANI, então CHAGATAI não pode pulá-lo.", jogo.moverPeao(Arrays.asList(p2), 1));
     }
 
-    // ------------------------------------------------------------ Pegar tributo
+    //  pegar tributo
 
     @Test(timeout = 2000)
     public void testaSeTributoSoPodeSerPegoDeProvinciaAdjacenteAParadaDoTurno() {
@@ -185,7 +194,7 @@ public class JogoTest {
         assertFalse("ProvEspada ficou vazia e não pode ceder outro tributo.", jogo.pegarTributo(provEspada));
     }
 
-    // ------------------------------------------------------------- Atacar cidades
+    //  atacar cidades
 
     @Test(timeout = 2000)
     public void testaSeSegundoTesouroDaMesmaCidadeNoTurnoCustaDuasEspadas() {
@@ -229,13 +238,13 @@ public class JogoTest {
         assertEquals("Kiev deveria ter recebido 4 tesouros.", 4, kiev.getQuantidadeTesouros());
     }
 
-    // ------------------------------------------------------------------ Khan
+    //  khan
 
     @Test(timeout = 2000)
     public void testaSeKhanAdicionaTributoNaProvinciaENasDuasIndicadasRespeitandoOMaximo() {
         Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
         provMoeda.adicionarTributo();
-        provMoeda.adicionarTributo(); // ProvMoeda já está no máximo (3)
+        provMoeda.adicionarTributo(); // provMoeda já está no máximo (3)
 
         assertTrue(jogo.moverKhan(provEspada));
 
@@ -254,7 +263,7 @@ public class JogoTest {
         assertTrue("O Khan pode ir para outra província do Khan.", jogo.moverKhan(provKhan2));
     }
 
-    // ---------------------------------------------------------------- Yurts
+    //  yurts
 
     @Test(timeout = 2000)
     public void testaSeConstruirYurtExigePecaDeYurtEParadaFeitaNoTurno() {
@@ -277,13 +286,13 @@ public class JogoTest {
         Jogador altani = jogo.getJogadorDaVez();
         jogo.moverPeao(Arrays.asList(p1), 1);
         jogo.passarVez();
-        jogo.passarVez(); // ALTANI começa este turno em P1
+        jogo.passarVez(); // aLTANI começa este turno em P1
         altani.adicionarTributos(TipoTributo.YURT, 1);
 
         assertFalse("Yurts só podem ser construídos em paradas feitas durante o movimento.", jogo.construirYurt(p1));
     }
 
-    // ----------------------------------------------------------- Fim de jogo
+    //  fim de jogo
 
     @Test(timeout = 2000)
     public void testaSeFimDeJogoEDisparadoAos14VotosComTresJogadores() {

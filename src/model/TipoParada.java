@@ -1,6 +1,6 @@
 package model;
 
-// Capacidades de cada tipo de parada (manual, págs. 7 e 11)
+// capacidades de cada tipo de parada (manual, págs. 7 e 11)
 enum TipoParada {
     SIMPLES(1, 1),
     DUPLA(2, 2),                        // paradas de conselheiro: cabem 2 peões e 2 yurts

@@ -1,6 +1,6 @@
 package model;
 
-// Qualquer lugar nomeado do tabuleiro: paradas, cidades e províncias
+// qualquer lugar nomeado do tabuleiro: paradas, cidades e províncias
 abstract class Local {
     private final String nome;
     private final Regiao regiao; // null para Karakorum, que não pertence a nenhuma região

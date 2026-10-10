@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// Estado de uma partida e regras do manual. Quem decide QUANTAS ações o jogador tem
+// estado de uma partida e regras do manual. Quem decide QUANTAS ações o jogador tem
 // (cavalos, punhos) é o Controller; aqui só se valida se cada ação é permitida.
 class Jogo {
     static final int MIN_JOGADORES = 2;
     static final int MAX_JOGADORES = 5;
     static final int CIDADES_REVELADAS_NO_INICIO = 3;
 
-    // Marca da trilha do Kurultai que dispara o fim do jogo, por número de jogadores (pág. 14)
+    // marca da trilha do Kurultai que dispara o fim do jogo, por número de jogadores (pág. 14)
     private static final Map<Integer, Integer> VOTOS_PARA_FIM = new HashMap<>();
     static {
         VOTOS_PARA_FIM.put(2, 10);
@@ -33,12 +33,12 @@ class Jogo {
     private boolean khanNaAreaDeMelhorias = false;
     private int votosNoConselho = 0;            // posição da ficha neutra
 
-    // Estado do turno atual
+    // estado do turno atual
     private final List<Parada> paradasDoTurno = new ArrayList<>();      // inclui a parada de partida
     private final List<Parada> paradasDoMovimento = new ArrayList<>();  // só as alcançadas ao se mover
     private final Map<Cidade, Integer> tesourosTomadosNoTurno = new HashMap<>();
 
-    // A ordem da lista é a ordem de jogo (o 1º é quem tem mais descendentes)
+    // a ordem da lista é a ordem de jogo (o 1º é quem tem mais descendentes)
     Jogo(Tabuleiro tabuleiro, List<Herdeiro> herdeirosNaOrdemDeJogo) {
         if (herdeirosNaOrdemDeJogo.size() < MIN_JOGADORES || herdeirosNaOrdemDeJogo.size() > MAX_JOGADORES) {
             throw new IllegalArgumentException("O jogo deve ter de 2 a 5 jogadores.");
@@ -65,8 +65,8 @@ class Jogo {
         iniciarTurno();
     }
 
-    // Revela as 3 primeiras cidades com 4 tesouros cada; as demais ficam na pilha.
-    // As listas já devem vir embaralhadas.
+    // revela as 3 primeiras cidades com 4 tesouros cada; as demais ficam na pilha.
+    // as listas já devem vir embaralhadas.
     void prepararCidades(List<Cidade> cidadesEmbaralhadas, List<TipoTesouro> tesourosEmbaralhados) {
         pilhaDeTesouros = new ArrayList<>(tesourosEmbaralhados);
         todasAsCidades.clear();
@@ -101,18 +101,18 @@ class Jogo {
 
     private void iniciarTurno() {
         paradasDoTurno.clear();
-        paradasDoTurno.add(getJogadorDaVez().getPosicao()); // tributos valem "antes, durante ou após" o movimento
+        paradasDoTurno.add(getJogadorDaVez().getPosicao()); // tributos valem "Antes, durante ou após" o movimento
         paradasDoMovimento.clear();
         tesourosTomadosNoTurno.clear();
     }
 
-    // ---------------------------------------------------------------- Mover
+    //  mover
 
-    // Move o peão da vez pelas paradas do caminho (sem incluir a parada de origem).
-    // Cada parada do caminho é um movimento. Para ir até ela o peão pode, se quiser, pular
+    // move o peão da vez pelas paradas do caminho (sem incluir a parada de origem).
+    // cada parada do caminho é um movimento. Para ir até ela o peão pode, se quiser, pular
     // paradas com yurts próprios, que não entram no caminho: o jogador nunca esteve nelas,
     // então não servem de base para tributos nem outras ações (manual, págs. 7, 8 e 11).
-    // Pode-se passar por paradas ocupadas, mas não terminar numa parada sem espaço.
+    // pode-se passar por paradas ocupadas, mas não terminar numa parada sem espaço.
     boolean moverPeao(List<Parada> caminho, int movimentosDisponiveis) {
         if (caminho.isEmpty() || caminho.size() > movimentosDisponiveis) {
             return false;
@@ -140,7 +140,7 @@ class Jogo {
         return true;
     }
 
-    // Verdadeiro se há rota direta ou uma sequência de rotas cujas paradas intermediárias
+    // verdadeiro se há rota direta ou uma sequência de rotas cujas paradas intermediárias
     // têm todas yurt do próprio jogador
     private boolean alcancaEmUmMovimento(Jogador jogador, Parada origem, Parada destino) {
         List<Parada> visitadas = new ArrayList<>();
@@ -171,9 +171,9 @@ class Jogo {
         return false;
     }
 
-    // ------------------------------------------------------- Pegar tributo
+    //  pegar tributo
 
-    // Pega 1 peça de uma província adjacente a alguma parada feita neste turno
+    // pega 1 peça de uma província adjacente a alguma parada feita neste turno
     boolean pegarTributo(Provincia provincia) {
         if (!fezParadaAdjacente(provincia) || !provincia.removerTributo()) {
             return false;
@@ -182,9 +182,9 @@ class Jogo {
         return true;
     }
 
-    // ----------------------------------------------------------- Usar o Khan
+    //  usar o Khan
 
-    // O Khan não pode ficar onde está. Numa província, ela e as 2 indicadas pelas setas
+    // o Khan não pode ficar onde está. Numa província, ela e as 2 indicadas pelas setas
     // recebem 1 tributo cada (respeitando o máximo de 3).
     boolean moverKhan(Provincia destino) {
         if (!destino.isDoKhan() || destino == provinciaDoKhan) {
@@ -199,7 +199,7 @@ class Jogo {
         return true;
     }
 
-    // A reposição das melhorias será tratada quando as peças de melhoria forem modeladas
+    // a reposição das melhorias será tratada quando as peças de melhoria forem modeladas
     boolean moverKhanParaAreaDeMelhorias() {
         if (khanNaAreaDeMelhorias) {
             return false;
@@ -213,10 +213,10 @@ class Jogo {
         return provinciaDoKhan;
     }
 
-    // ------------------------------------------------------ Atacar cidades
+    //  atacar cidades
 
-    // Custa 1 espada para o 1º tesouro da cidade no turno e 2 para cada um dos seguintes.
-    // Quem toma o último tesouro conquista a cidade, põe um yurt nela e revela a próxima.
+    // custa 1 espada para o 1º tesouro da cidade no turno e 2 para cada um dos seguintes.
+    // quem toma o último tesouro conquista a cidade, põe um yurt nela e revela a próxima.
     boolean atacarCidade(Cidade cidade, TipoTesouro tesouro) {
         if (!cidade.podeSerAtacada() || !cidade.possuiTesouro(tesouro) || !fezParadaAdjacente(cidade)) {
             return false;
@@ -245,9 +245,9 @@ class Jogo {
         return tesourosTomadosNoTurno.containsKey(cidade) ? 2 : 1;
     }
 
-    // ------------------------------------------------------- Construir yurts
+    //  construir yurts
 
-    // Gasta 1 peça de yurt para construir numa parada feita durante o movimento deste turno
+    // gasta 1 peça de yurt para construir numa parada feita durante o movimento deste turno
     // que ainda tenha espaço (pág. 11)
     boolean construirYurt(Parada parada) {
         Jogador jogador = getJogadorDaVez();
@@ -262,7 +262,7 @@ class Jogo {
         return true;
     }
 
-    // ------------------------------------------------------- Votos e fim de jogo
+    //  votos e fim de jogo
 
     void registrarVotos(Jogador jogador, int quantidade) {
         jogador.adicionarVotos(quantidade);
@@ -277,7 +277,7 @@ class Jogo {
         return VOTOS_PARA_FIM.get(jogadores.size());
     }
 
-    // Disparado pela trilha do Kurultai ou, mais raramente, quando todas as cidades caem
+    // disparado pela trilha do Kurultai ou, mais raramente, quando todas as cidades caem
     boolean fimDeJogoDisparado() {
         if (votosNoConselho >= getVotosParaFimDeJogo()) {
             return true;

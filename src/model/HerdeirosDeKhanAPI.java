@@ -70,7 +70,7 @@ public class HerdeirosDeKhanAPI {
         return jogo.fimDeJogoDisparado();
     }
 
-    // Retorna null se o local não existir ou não for do tipo esperado
+    // retorna null se o local não existir ou não for do tipo esperado
     private <T extends Local> T buscar(Class<T> classe, String nome) {
         Local local = jogo.getTabuleiro().getLocal(nome);
         return classe.isInstance(local) ? classe.cast(local) : null;
