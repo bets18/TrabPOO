@@ -1,16 +1,45 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
-
+// Área entre as rotas que fornece um único tipo de tributo (o ícone impresso no tabuleiro)
 class Provincia extends Local {
-    List<TipoTributo> tributos = new ArrayList<>();
+    static final int MAX_TRIBUTOS = 3;
 
-    void adicionarTributo(TipoTributo tributo) {
-        if (tributos.size() < 3) {
-            tributos.add(tributo);
-        } else {
-            throw new IllegalStateException("Limite máximo de 3 tributos alcançado.");
+    private final TipoTributo tipo;
+    private final boolean doKhan; // províncias com o ícone da cabeça do Khan
+    private int quantidade = 0;
+
+    Provincia(String nome, Regiao regiao, TipoTributo tipo, boolean doKhan) {
+        super(nome, regiao);
+        this.tipo = tipo;
+        this.doKhan = doKhan;
+    }
+
+    TipoTributo getTipo() {
+        return tipo;
+    }
+
+    boolean isDoKhan() {
+        return doKhan;
+    }
+
+    int getQuantidade() {
+        return quantidade;
+    }
+
+    // Retorna false se a província já estiver no máximo (3 peças); nesse caso nada muda
+    boolean adicionarTributo() {
+        if (quantidade >= MAX_TRIBUTOS) {
+            return false;
         }
+        quantidade++;
+        return true;
+    }
+
+    boolean removerTributo() {
+        if (quantidade == 0) {
+            return false;
+        }
+        quantidade--;
+        return true;
     }
 }

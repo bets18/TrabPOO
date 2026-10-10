@@ -32,11 +32,8 @@ tmp/
 *.swp
 *~.nib
 local.properties
-.settings/
 .loadpath
 .recommenders
-.classpath
-.project
 
 # OS generated files #
 .DS_Store

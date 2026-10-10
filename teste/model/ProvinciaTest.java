@@ -6,29 +6,22 @@ import static org.junit.Assert.*;
 public class ProvinciaTest {
 
     @Test(timeout = 2000)
-    public void testaSeAdicionarTributoFuncionaCorretamenteAteOTerceiroTributoNaProvincia() {
-        Provincia provincia = new Provincia();
-        
-        provincia.adicionarTributo(TipoTributo.MOEDA);
-        assertEquals("A lista deveria conter 1 tributo após a primeira inserção.", 1, provincia.tributos.size());
-        
-        provincia.adicionarTributo(TipoTributo.ESPADA);
-        assertEquals("A lista deveria conter 2 tributos após a segunda inserção.", 2, provincia.tributos.size());
-        
-        provincia.adicionarTributo(TipoTributo.YURT);
-        assertEquals("A lista deveria conter 3 tributos após a terceira inserção.", 3, provincia.tributos.size());
+    public void testaSeProvinciaNaoUltrapassaOLimiteDeTresTributos() {
+        Provincia provincia = new Provincia("Estepe", Regiao.RUSSIA, TipoTributo.MOEDA, false);
+
+        assertTrue("A 1ª peça deveria ser aceita.", provincia.adicionarTributo());
+        assertTrue("A 2ª peça deveria ser aceita.", provincia.adicionarTributo());
+        assertTrue("A 3ª peça deveria ser aceita.", provincia.adicionarTributo());
+        assertFalse("A 4ª peça deveria ser recusada, pois o máximo é 3 por província.", provincia.adicionarTributo());
+
+        assertEquals("A província deveria continuar com 3 peças.", 3, provincia.getQuantidade());
     }
 
-    @Test(expected = IllegalStateException.class, timeout = 2000)
-    public void testaSeExcecaoELancadaAoTentarAdicionarOQuartoTributoNaProvincia() {
-        Provincia provincia = new Provincia();
-        
-        // Adicionando 3 tributos permitidos
-        provincia.adicionarTributo(TipoTributo.MOEDA);
-        provincia.adicionarTributo(TipoTributo.ESPADA);
-        provincia.adicionarTributo(TipoTributo.YURT);
-        
-        // A tentativa de adicionar o 4º tributo deve lançar a IllegalStateException
-        provincia.adicionarTributo(TipoTributo.MOEDA);
+    @Test(timeout = 2000)
+    public void testaSeRemoverTributoDeProvinciaVaziaFalha() {
+        Provincia provincia = new Provincia("Estepe", Regiao.RUSSIA, TipoTributo.MOEDA, false);
+
+        assertFalse("Não deveria ser possível retirar tributo de uma província vazia.", provincia.removerTributo());
+        assertEquals("A quantidade não pode ficar negativa.", 0, provincia.getQuantidade());
     }
 }
