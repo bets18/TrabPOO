@@ -3,6 +3,10 @@ package model;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+/*
+ * Testes da classe Jogador (tributos e estoque de yurts).
+ */
+
 public class JogadorTest {
 
     @Test(timeout = 2000)

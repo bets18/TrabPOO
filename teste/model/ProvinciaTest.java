@@ -3,6 +3,10 @@ package model;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+/*
+ * Testes da classe Provincia (limite de tributos).
+ */
+
 public class ProvinciaTest {
 
     @Test(timeout = 2000)

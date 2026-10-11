@@ -7,6 +7,10 @@ import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+/*
+ * Testes da classe Cidade (revelação e condição para ser atacada).
+ */
+
 public class CidadeTest {
 
     @Test(timeout = 2000)

@@ -3,6 +3,10 @@ package model;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+/*
+ * Testes da classe Tabuleiro (rotas entre paradas e cadastro de locais).
+ */
+
 public class TabuleiroTest {
 
     @Test(timeout = 2000)

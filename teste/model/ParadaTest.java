@@ -3,6 +3,10 @@ package model;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+/*
+ * Testes da classe Parada (capacidade de peões e de yurts).
+ */
+
 public class ParadaTest {
 
     @Test(timeout = 2000)

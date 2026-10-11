@@ -6,6 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+/*
+ * Testes da classe HerdeirosDeKhanAPI
+ */
+
 public class HerdeirosDeKhanAPITest {
 
     private HerdeirosDeKhanAPI api;
