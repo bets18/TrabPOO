@@ -39,7 +39,7 @@ class Provincia extends Local {
         if (quantidade == 0) {
             return false;
         }
-        quantidade;
+        quantidade--;
         return true;
     }
 }

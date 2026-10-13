@@ -61,7 +61,7 @@ class Jogador {
         if (yurtsNoEstoque == 0) {
             return false;
         }
-        yurtsNoEstoque;
+        yurtsNoEstoque--;
         return true;
     }
 
