@@ -1,13 +1,15 @@
 package model;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // fonte dos tesouros. Só pode ser atacada depois de revelada e enquanto não for conquistada.
 class Cidade extends Local {
     static final int TESOUROS_AO_REVELAR = 4;
 
-    private final List<TipoTesouro> tesouros = new ArrayList<>();
+    private final Map<TipoTesouro, Integer> tesouros = new HashMap<>(); // tipo -> quantidade
+    private int quantidadeTesouros = 0;
     private boolean revelada = false;
     private Jogador conquistador = null;
 
@@ -19,7 +21,9 @@ class Cidade extends Local {
     void revelar(List<TipoTesouro> pilhaDeTesouros) {
         revelada = true;
         for (int i = 0; i < TESOUROS_AO_REVELAR && !pilhaDeTesouros.isEmpty(); i++) {
-            tesouros.add(pilhaDeTesouros.remove(0));
+            TipoTesouro tipo = pilhaDeTesouros.remove(0);
+            tesouros.put(tipo, tesouros.getOrDefault(tipo, 0) + 1);
+            quantidadeTesouros++;
         }
     }
 
@@ -40,18 +44,23 @@ class Cidade extends Local {
     }
 
     boolean podeSerAtacada() {
-        return revelada && !estaConquistada() && !tesouros.isEmpty();
+        return revelada && !estaConquistada() && quantidadeTesouros > 0;
     }
 
     boolean possuiTesouro(TipoTesouro tipo) {
-        return tesouros.contains(tipo);
+        return tesouros.getOrDefault(tipo, 0) > 0;
     }
 
     boolean removerTesouro(TipoTesouro tipo) {
-        return tesouros.remove(tipo);
+        if (!possuiTesouro(tipo)) {
+            return false;
+        }
+        tesouros.put(tipo, tesouros.get(tipo) - 1);
+        quantidadeTesouros--;
+        return true;
     }
 
     int getQuantidadeTesouros() {
-        return tesouros.size();
+        return quantidadeTesouros;
     }
 }

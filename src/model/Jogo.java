@@ -2,8 +2,10 @@ package model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 // estado de uma partida e regras do manual. Quem decide QUANTAS ações o jogador tem
 // (cavalos, punhos) é o Controller; aqui só se valida se cada ação é permitida.
@@ -34,8 +36,9 @@ class Jogo {
     private int votosNoConselho = 0;            // posição da ficha neutra
 
     // estado do turno atual
-    private final List<Parada> paradasDoTurno = new ArrayList<>();      // inclui a parada de partida
-    private final List<Parada> paradasDoMovimento = new ArrayList<>();  // só as alcançadas ao se mover
+    // conjuntos: só importa se a parada foi feita, não a ordem
+    private final Set<Parada> paradasDoTurno = new HashSet<>();      // inclui a parada de partida
+    private final Set<Parada> paradasDoMovimento = new HashSet<>();  // só as alcançadas ao se mover
     private final Map<Cidade, Integer> tesourosTomadosNoTurno = new HashMap<>();
 
     // a ordem da lista é a ordem de jogo (o 1º é quem tem mais descendentes)
@@ -143,8 +146,8 @@ class Jogo {
     // verdadeiro se há rota direta ou uma sequência de rotas cujas paradas intermediárias
     // têm todas yurt do próprio jogador
     private boolean alcancaEmUmMovimento(Jogador jogador, Parada origem, Parada destino) {
-        List<Parada> visitadas = new ArrayList<>();
-        List<Parada> fila = new ArrayList<>();
+        Set<Parada> visitadas = new HashSet<>();
+        List<Parada> fila = new ArrayList<>(); // a ordem de chegada importa na busca em largura
         fila.add(origem);
         visitadas.add(origem);
         while (!fila.isEmpty()) {

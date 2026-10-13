@@ -1,13 +1,16 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // espaço de movimento dos peões
 class Parada extends Local {
     private final TipoParada tipo;
     private final List<Jogador> peoes = new ArrayList<>();
-    private final List<Jogador> donosDosYurts = new ArrayList<>();
+    private final Map<Jogador, Integer> yurtsPorDono = new HashMap<>(); // dono -> quantidade
+    private int quantidadeYurts = 0;
 
     Parada(String nome, Regiao regiao, TipoParada tipo) {
         super(nome, regiao);
@@ -34,21 +37,22 @@ class Parada extends Local {
     }
 
     boolean temEspacoParaYurt() {
-        return donosDosYurts.size() < tipo.getCapacidadeYurts();
+        return quantidadeYurts < tipo.getCapacidadeYurts();
     }
 
     void adicionarYurt(Jogador dono) {
         if (!temEspacoParaYurt()) {
             throw new IllegalStateException("A parada " + getNome() + " não tem espaço para outro yurt.");
         }
-        donosDosYurts.add(dono);
+        yurtsPorDono.put(dono, yurtsPorDono.getOrDefault(dono, 0) + 1);
+        quantidadeYurts++;
     }
 
     boolean possuiYurtDe(Jogador jogador) {
-        return donosDosYurts.contains(jogador);
+        return yurtsPorDono.containsKey(jogador);
     }
 
     int getQuantidadeYurts() {
-        return donosDosYurts.size();
+        return quantidadeYurts;
     }
 }
