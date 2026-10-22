@@ -40,6 +40,8 @@ class Jogo {
     private final Set<Parada> paradasDoTurno = new HashSet<>();      // inclui a parada de partida
     private final Set<Parada> paradasDoMovimento = new HashSet<>();  // só as alcançadas ao se mover
     private final Map<Cidade, Integer> tesourosTomadosNoTurno = new HashMap<>();
+    private Coluna colunaDoTurno = null;    // coluna ativada neste turno (null = ainda não ativou)
+    private int movimentosRestantes = 0;    // cavalos ainda não usados
 
     // a ordem da lista é a ordem de jogo (o 1º é quem tem mais descendentes)
     Jogo(Tabuleiro tabuleiro, List<Herdeiro> herdeirosNaOrdemDeJogo) {
@@ -55,8 +57,15 @@ class Jogo {
             Jogador jogador = new Jogador(herdeirosNaOrdemDeJogo.get(i));
             // 1 moeda para o 1º e o 2º a jogar, 2 moedas para os demais
             jogador.adicionarTributos(TipoTributo.MOEDA, i < 2 ? 1 : 2);
-            tabuleiro.getKarakorum().adicionarPeao(jogador);
-            jogador.setPosicao(tabuleiro.getKarakorum());
+            for (int peao = 0; peao < jogador.getNumeroDePeoes(); peao++) {
+                tabuleiro.getKarakorum().adicionarPeao(jogador);
+                jogador.setPosicaoDoPeao(peao, tabuleiro.getKarakorum());
+            }
+            // Tolui começa com 1 yurt em Karakorum, que só ajuda na movimentação dele (pág. 20)
+            if (jogador.getHerdeiro() == Herdeiro.TOLUI) {
+                jogador.retirarYurtDoEstoque();
+                tabuleiro.getKarakorum().adicionarYurtInicial(jogador);
+            }
             jogadores.add(jogador);
         }
 
@@ -93,6 +102,10 @@ class Jogo {
         return jogadores.get(indice);
     }
 
+    int getIndiceJogadorDaVez() {
+        return indiceJogadorDaVez;
+    }
+
     Jogador getJogadorDaVez() {
         return jogadores.get(indiceJogadorDaVez);
     }
@@ -107,6 +120,69 @@ class Jogo {
         paradasDoTurno.add(getJogadorDaVez().getPosicao()); // tributos valem "Antes, durante ou após" o movimento
         paradasDoMovimento.clear();
         tesourosTomadosNoTurno.clear();
+        colunaDoTurno = null;
+        movimentosRestantes = 0;
+    }
+
+    //  ativar coluna (início de todo turno, pág. 6)
+
+    // coloca a ficha de ativação na coluna e libera as ações dela; a coluna branca devolve
+    // todas as fichas. Só uma ativação por turno, e não pode ser numa coluna que já tem ficha.
+    boolean ativarColuna(Coluna coluna) {
+        Jogador jogador = getJogadorDaVez();
+        if (colunaDoTurno != null || !jogador.podeAtivar(coluna)) {
+            return false;
+        }
+        AcoesColuna acoes = jogador.getHerdeiro().getAcoes(coluna);
+        colunaDoTurno = coluna;
+        movimentosRestantes = acoes.getCavalos();
+        if (acoes.recuperaFichas()) {
+            jogador.recuperarFichas();
+        } else {
+            jogador.colocarFicha(coluna);
+        }
+        return true;
+    }
+
+    Coluna getColunaDoTurno() {
+        return colunaDoTurno;
+    }
+
+    int getMovimentosRestantes() {
+        return movimentosRestantes;
+    }
+
+    // Altani: escolhe qual dos 2 peões move e faz as ações. Só vale antes de o turno ter
+    // movimento; o outro peão fica parado o turno todo (pág. 20).
+    boolean selecionarPeao(int peao) {
+        Jogador jogador = getJogadorDaVez();
+        if (peao < 0 || peao >= jogador.getNumeroDePeoes() || !paradasDoMovimento.isEmpty()) {
+            return false;
+        }
+        jogador.setPeaoAtivo(peao);
+        paradasDoTurno.clear();
+        paradasDoTurno.add(jogador.getPosicao());
+        return true;
+    }
+
+    // índice de um peão do jogador da vez, que não seja o ativo, parado nesta parada (-1 se não houver)
+    int peaoInativoEm(Parada parada) {
+        Jogador jogador = getJogadorDaVez();
+        for (int peao = 0; peao < jogador.getNumeroDePeoes(); peao++) {
+            if (peao != jogador.getPeaoAtivo() && jogador.getPosicaoDoPeao(peao) == parada) {
+                return peao;
+            }
+        }
+        return -1;
+    }
+
+    // o turno só acaba depois de ativar uma coluna
+    boolean encerrarTurno() {
+        if (colunaDoTurno == null) {
+            return false;
+        }
+        passarVez();
+        return true;
     }
 
     //  mover
@@ -146,6 +222,12 @@ class Jogo {
     // verdadeiro se há rota direta ou uma sequência de rotas cujas paradas intermediárias
     // têm todas yurt do próprio jogador
     private boolean alcancaEmUmMovimento(Jogador jogador, Parada origem, Parada destino) {
+        return alcancaveisEmUmMovimento(jogador, origem).contains(destino);
+    }
+
+    // todas as paradas a 1 movimento: vizinhas diretas e as que ficam depois de yurts próprios
+    private Set<Parada> alcancaveisEmUmMovimento(Jogador jogador, Parada origem) {
+        Set<Parada> alcancaveis = new HashSet<>();
         Set<Parada> visitadas = new HashSet<>();
         List<Parada> fila = new ArrayList<>(); // a ordem de chegada importa na busca em largura
         fila.add(origem);
@@ -153,16 +235,61 @@ class Jogo {
         while (!fila.isEmpty()) {
             Parada atual = fila.remove(0);
             for (Parada vizinha : tabuleiro.getParadasVizinhas(atual)) {
-                if (vizinha == destino) {
-                    return true;
-                }
+                alcancaveis.add(vizinha);
                 if (vizinha.possuiYurtDe(jogador) && !visitadas.contains(vizinha)) {
                     visitadas.add(vizinha);
                     fila.add(vizinha);
                 }
             }
         }
-        return false;
+        alcancaveis.remove(origem);
+        return alcancaveis;
+    }
+
+    //  mover por clique (2ª iteração)
+
+    // o jogador aponta só o destino: o Model procura o caminho com menos movimentos e
+    // aplica as mesmas regras de moverPeao. Se não couber nos cavalos restantes, nada muda.
+    boolean moverPara(Parada destino) {
+        if (colunaDoTurno == null) {
+            return false;
+        }
+        List<Parada> caminho = menorCaminho(getJogadorDaVez(), destino);
+        if (caminho == null || !moverPeao(caminho, movimentosRestantes)) {
+            return false;
+        }
+        movimentosRestantes -= caminho.size();
+        return true;
+    }
+
+    // busca em largura em que cada passo é 1 movimento; devolve as paradas do caminho
+    // (sem a origem) ou null se o destino for inalcançável
+    private List<Parada> menorCaminho(Jogador jogador, Parada destino) {
+        Parada origem = jogador.getPosicao();
+        Map<Parada, Parada> anterior = new HashMap<>();
+        List<Parada> fila = new ArrayList<>();
+        fila.add(origem);
+        anterior.put(origem, null);
+        while (!fila.isEmpty()) {
+            Parada atual = fila.remove(0);
+            if (atual == destino) {
+                break;
+            }
+            for (Parada proxima : alcancaveisEmUmMovimento(jogador, atual)) {
+                if (!anterior.containsKey(proxima)) {
+                    anterior.put(proxima, atual);
+                    fila.add(proxima);
+                }
+            }
+        }
+        if (destino == origem || !anterior.containsKey(destino)) {
+            return null;
+        }
+        List<Parada> caminho = new ArrayList<>();
+        for (Parada p = destino; p != origem; p = anterior.get(p)) {
+            caminho.add(0, p);
+        }
+        return caminho;
     }
 
     private boolean fezParadaAdjacente(Local local) {
