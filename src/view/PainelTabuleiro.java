@@ -21,8 +21,8 @@ import javax.swing.JPanel;
 
 import model.HerdeirosDeKhanAPI;
 
-// desenha o tabuleiro (drawImage do Graphics2D) e os peões (formas do Java2D), e transforma
-// um clique na imagem no nome da parada clicada
+// desenha o tabuleiro com drawImage e os peões e yurts com formas do Java2D.
+// Também descobre em qual parada (ou peão) o jogador clicou
 class PainelTabuleiro extends JPanel {
     private static final long serialVersionUID = 1L;
     private static final int LARGURA_EXIBIDA = 1000;
@@ -41,13 +41,13 @@ class PainelTabuleiro extends JPanel {
         addMouseListener(new CliqueNoTabuleiro());
     }
 
-    // mesma escala nos dois eixos, para caber no painel sem distorcer
+    // mesma escala nos dois eixos pra imagem não ficar distorcida
     private double escala() {
         return Math.min(getWidth() / (double) CoordenadasMapa.LARGURA_IMAGEM,
                 getHeight() / (double) CoordenadasMapa.ALTURA_IMAGEM);
     }
 
-    // o tabuleiro fica centralizado na horizontal quando sobra largura
+    // se sobrar largura, o tabuleiro fica centralizado
     private int margemEsquerda() {
         return (getWidth() - (int) (CoordenadasMapa.LARGURA_IMAGEM * escala())) / 2;
     }
@@ -66,7 +66,7 @@ class PainelTabuleiro extends JPanel {
         desenharPeoes(g2, s);
     }
 
-    // yurts dos jogadores: uma tenda na cor do dono, acima da parada (Java2D)
+    // cada yurt é uma tendinha na cor do dono, um pouco acima da parada
     private void desenharYurts(Graphics2D g2, double s) {
         for (String parada : CoordenadasMapa.getNomes()) {
             List<String> donos = modelo.getDonosDeYurts(parada);
@@ -95,8 +95,15 @@ class PainelTabuleiro extends JPanel {
     }
 
     private void desenharPeoes(Graphics2D g2, double s) {
-        // agrupa os peões pela parada onde estão, para não desenhar um por cima do outro;
-        // cada peão é o par {jogador, índice do peão} (Altani tem 2)
+        for (double[] p : posicoesDosPeoes(s)) {
+            desenharPeao(g2, (int) p[0], (int) p[1], p[2], p[3]);
+        }
+    }
+
+    // posição de cada peão na tela (sem a margem), no formato {jogador, peão, x, y}.
+    // O desenho e o clique usam essa mesma conta, assim o clique cai onde o peão aparece
+    private List<double[]> posicoesDosPeoes(double s) {
+        // junta os peões por parada pra não desenhar um em cima do outro
         Map<String, List<int[]>> porParada = new HashMap<>();
         for (int i = 0; i < modelo.getNumeroDeJogadores(); i++) {
             for (int peao = 0; peao < modelo.getNumeroDePeoes(i); peao++) {
@@ -109,6 +116,7 @@ class PainelTabuleiro extends JPanel {
                 lista.add(new int[] {i, peao});
             }
         }
+        List<double[]> posicoes = new ArrayList<>();
         for (Map.Entry<String, List<int[]>> entrada : porParada.entrySet()) {
             int[][] pontos = CoordenadasMapa.getPontos(entrada.getKey());
             List<int[]> jogadores = entrada.getValue();
@@ -119,20 +127,34 @@ class PainelTabuleiro extends JPanel {
                     x = pontos[k % 2][0] * s;
                     y = pontos[k % 2][1] * s;
                 } else {
-                    // espalha os peões lado a lado em volta do ponto
+                    // senão espalha os peões lado a lado
                     double deslocamento = (k - (jogadores.size() - 1) / 2.0) * (RAIO_PEAO * 2 + 2);
                     x = pontos[0][0] * s + deslocamento;
                     y = pontos[0][1] * s;
                 }
-                desenharPeao(g2, jogadores.get(k)[0], jogadores.get(k)[1], x, y);
+                posicoes.add(new double[] {jogadores.get(k)[0], jogadores.get(k)[1], x, y});
             }
         }
+        return posicoes;
+    }
+
+    // peão do jogador da vez que não está ativo e foi clicado (-1 se não clicou em nenhum)
+    private int peaoInativoEm(double x, double y, double s) {
+        int jogador = modelo.getIndiceJogadorDaVez();
+        for (double[] p : posicoesDosPeoes(s)) {
+            double dx = x - p[2], dy = y - p[3];
+            if ((int) p[0] == jogador && (int) p[1] != modelo.getPeaoAtivo(jogador)
+                    && dx * dx + dy * dy <= RAIO_PEAO * RAIO_PEAO) {
+                return (int) p[1];
+            }
+        }
+        return -1;
     }
 
     private void desenharPeao(Graphics2D g2, int jogador, int peao, double x, double y) {
         String herdeiro = modelo.getHerdeiro(jogador);
         Ellipse2D corpo = new Ellipse2D.Double(x - RAIO_PEAO, y - RAIO_PEAO, RAIO_PEAO * 2, RAIO_PEAO * 2);
-        // destaque só no peão que o jogador da vez vai mover
+        // contorno amarelo só no peão que vai jogar
         if (jogador == modelo.getIndiceJogadorDaVez() && peao == modelo.getPeaoAtivo(jogador)) {
             g2.setColor(DESTAQUE);
             g2.fill(new Ellipse2D.Double(x - RAIO_PEAO - 5, y - RAIO_PEAO - 5, RAIO_PEAO * 2 + 10, RAIO_PEAO * 2 + 10));
@@ -143,7 +165,7 @@ class PainelTabuleiro extends JPanel {
         g2.setStroke(new BasicStroke(2f));
         g2.draw(corpo);
 
-        // com 2 peões, cada um leva o número: A1, A2
+        // a Altani tem 2 peões, então eles ficam A1 e A2
         String inicial = herdeiro.substring(0, 1) + (modelo.getNumeroDePeoes(jogador) > 1 ? String.valueOf(peao + 1) : "");
         g2.setFont(new Font("SansSerif", Font.BOLD, 13));
         FontMetrics fm = g2.getFontMetrics();
@@ -151,12 +173,19 @@ class PainelTabuleiro extends JPanel {
         g2.drawString(inicial, (float) (x - fm.stringWidth(inicial) / 2.0), (float) (y + fm.getAscent() / 2.0 - 2));
     }
 
-    // tratamento do clique: converte o ponto da tela para a imagem original e pergunta qual parada é
+    // se clicou no outro peão da Altani, troca de peão. Senão converte o ponto pra
+    // coordenada da imagem e vê qual parada é
     private class CliqueNoTabuleiro extends MouseAdapter {
         @Override
         public void mousePressed(MouseEvent e) {
             double s = escala();
-            String parada = CoordenadasMapa.paradaEm((e.getX() - margemEsquerda()) / s, e.getY() / s);
+            int x = e.getX() - margemEsquerda();
+            int peao = peaoInativoEm(x, e.getY(), s);
+            if (peao >= 0) {
+                acoes.peaoClicado(peao);
+                return;
+            }
+            String parada = CoordenadasMapa.paradaEm(x / s, e.getY() / s);
             if (parada != null) {
                 acoes.paradaClicada(parada);
             }

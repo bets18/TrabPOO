@@ -6,9 +6,9 @@ import model.HerdeirosDeKhanAPI;
 import view.AcoesDoJogador;
 import view.JanelaJogo;
 
-// conduz as etapas do turno: recebe os cliques da View, pede ao Model que aplique a regra e,
-// se a jogada foi aceita, manda a View se redesenhar. Jogada inválida não faz nada (sem mensagem),
-// como pede o PDF da 2ª iteração.
+// recebe os cliques da View, pede pro Model fazer a jogada e, se deu certo, manda a
+// janela redesenhar. Se a jogada não vale, não acontece nada (sem mensagem), como o
+// enunciado pede
 public class ControladorJogo implements AcoesDoJogador {
     private final HerdeirosDeKhanAPI modelo;
     private JanelaJogo janela;
@@ -22,7 +22,7 @@ public class ControladorJogo implements AcoesDoJogador {
         janela.setVisible(true);
     }
 
-    // 1º passo do turno: colocar a ficha de ativação numa coluna do tabuleiro do herdeiro
+    // primeiro passo do turno: colocar a ficha numa coluna
     @Override
     public void colunaClicada(String coluna) {
         if (modelo.ativarColuna(coluna)) {
@@ -30,16 +30,18 @@ public class ControladorJogo implements AcoesDoJogador {
         }
     }
 
-    // clique numa parada: se ali está o outro peão da Altani, ela passa a mover esse peão;
-    // senão é o destino do movimento, e o Model decide se dá para ir
+    // a parada clicada é o destino; quem decide se dá pra ir é o Model
     @Override
     public void paradaClicada(String parada) {
-        int outroPeao = modelo.getPeaoInativoEm(parada);
-        if (outroPeao >= 0 && modelo.selecionarPeao(outroPeao)) {
-            janela.atualizar();
-            return;
-        }
         if (modelo.moverPara(parada)) {
+            janela.atualizar();
+        }
+    }
+
+    // clicou no outro peão da Altani: ela passa a jogar com ele
+    @Override
+    public void peaoClicado(int peao) {
+        if (modelo.selecionarPeao(peao)) {
             janela.atualizar();
         }
     }

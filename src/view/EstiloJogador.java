@@ -4,9 +4,8 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
-// aparência de cada herdeiro na tela: a cor do jogador, a imagem do seu tabuleiro (cartela)
-// e o símbolo da sua ficha de ativação. O Model só conhece o nome do herdeiro; a View
-// usa esse nome como chave de HashMap para achar a imagem em tempo constante.
+// cor, cartela e ficha de cada herdeiro. O Model só passa o nome ("ALTANI"...)
+// e aqui ele vira a chave dos HashMaps pra achar a imagem
 final class EstiloJogador {
     private static final Map<String, Color> CORES = new HashMap<>();
     private static final Map<String, String> CARTELAS = new HashMap<>();

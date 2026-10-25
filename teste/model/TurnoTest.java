@@ -76,6 +76,21 @@ public class TurnoTest {
     }
 
     @Test(timeout = 2000)
+    public void testaSeAltaniPodeTerminarNaParadaDoOutroPeao() {
+        Jogador altani = jogo.getJogadorDaVez();
+        jogo.ativarColuna(Coluna.VERMELHA); // 1 cavalo, peao 1 vai pra R8
+        jogo.moverPara(parada("R8"));
+        jogo.encerrarTurno();
+        jogo.ativarColuna(Coluna.BRANCA); // Ogedei
+        jogo.encerrarTurno();
+        jogo.ativarColuna(Coluna.VERDE);
+
+        assertTrue("Karakorum cabe todo mundo, ate o outro peao", jogo.moverPara(t.getKarakorum()));
+        assertSame(t.getKarakorum(), altani.getPosicaoDoPeao(0));
+        assertSame(t.getKarakorum(), altani.getPosicaoDoPeao(1));
+    }
+
+    @Test(timeout = 2000)
     public void testaSeToluiPulaKarakorumPeloYurtInicial() {
         Jogo comTolui = new Jogo(t, Arrays.asList(Herdeiro.TOLUI, Herdeiro.OGEDEI));
         Jogador tolui = comTolui.getJogadorDaVez();

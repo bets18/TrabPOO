@@ -69,7 +69,7 @@ public class JogoTest {
         return jogo;
     }
 
-    //  preparação 
+    //  preparação
 
     @Test(timeout = 2000)
     public void testaSePreparacaoDaUmaMoedaAosDoisPrimeirosEDuasAosDemais() {
@@ -105,7 +105,12 @@ public class JogoTest {
         criarJogo(Herdeiro.ALTANI);
     }
 
-    //  mover 
+    @Test(expected = IllegalArgumentException.class, timeout = 2000)
+    public void testaSeJogoRejeitaHerdeiroRepetido() {
+        criarJogo(Herdeiro.ALTANI, Herdeiro.ALTANI);
+    }
+
+    //  mover
 
     @Test(timeout = 2000)
     public void testaSeMovimentoFalhaQuandoCaminhoExigeMaisMovimentosQueOsDisponiveis() {

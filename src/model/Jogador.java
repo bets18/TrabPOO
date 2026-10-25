@@ -15,10 +15,10 @@ class Jogador {
     private final Map<TipoTesouro, Integer> tesouros = new HashMap<>();
     private int yurtsNoEstoque = YURTS_INICIAIS;
     private int votos = 0;
-    // posição de cada peão; só Altani tem 2 (pág. 20). A ordem importa: o índice identifica o peão.
+    // onde está cada peão (só a Altani tem 2). O índice da lista é o número do peão
     private final List<Parada> posicoes = new ArrayList<>();
-    private int peaoAtivo = 0; // o peão que move e faz as ações neste turno
-    private final Set<Coluna> colunasComFicha = new HashSet<>(); // fichas de ativação já colocadas
+    private int peaoAtivo = 0; // peão que joga neste turno
+    private final Set<Coluna> colunasComFicha = new HashSet<>();
 
     Jogador(Herdeiro herdeiro) {
         this.herdeiro = herdeiro;
@@ -42,7 +42,7 @@ class Jogador {
         tributos.put(tipo, tributos.get(tipo) + quantidade);
     }
 
-    // retorna false (sem alterar nada) se o jogador não tiver peças suficientes
+    // se não tiver peças suficientes devolve false e não gasta nada
     boolean gastarTributos(TipoTributo tipo, int quantidade) {
         int atual = tributos.get(tipo);
         if (quantidade < 0 || atual < quantidade) {
@@ -84,7 +84,7 @@ class Jogador {
         votos += quantidade;
     }
 
-    // a coluna branca está sempre livre: ela devolve todas as fichas, inclusive a própria
+    // a branca sempre pode ser ativada, porque é ela que devolve as fichas
     boolean podeAtivar(Coluna coluna) {
         return coluna == Coluna.BRANCA || !colunasComFicha.contains(coluna);
     }
@@ -97,7 +97,7 @@ class Jogador {
         colunasComFicha.clear();
     }
 
-    // posição do peão ativo (para quase todos os herdeiros, o único peão)
+    // posição do peão ativo
     Parada getPosicao() {
         return posicoes.get(peaoAtivo);
     }

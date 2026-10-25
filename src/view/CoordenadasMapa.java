@@ -3,16 +3,16 @@ package view;
 import java.util.HashMap;
 import java.util.Map;
 
-// onde cada parada fica na imagem assets/tabuleiro.jpg (2905 x 2919 px). A geometria é da View;
-// o Model só conhece os nomes e as rotas. Paradas duplas têm dois círculos.
+// posição de cada parada na imagem assets/tabuleiro.jpg (2905 x 2919). Isso é coisa da View,
+// o Model só sabe os nomes e as rotas. Parada dupla tem 2 círculos
 final class CoordenadasMapa {
     static final int LARGURA_IMAGEM = 2905;
     static final int ALTURA_IMAGEM = 2919;
     static final String KARAKORUM = "Karakorum";
 
-    private static final int RAIO_CLIQUE = 60; // raio de um círculo de parada na imagem original
+    private static final int RAIO_CLIQUE = 60; // raio do círculo de uma parada na imagem
 
-    // escudo de Karakorum na imagem
+    // retângulo do escudo de Karakorum
     private static final int KARAKORUM_X1 = 1200, KARAKORUM_Y1 = 1040, KARAKORUM_X2 = 1690, KARAKORUM_Y2 = 1540;
 
     private static final Map<String, int[][]> PARADAS = new HashMap<>();
@@ -53,7 +53,7 @@ final class CoordenadasMapa {
         simples("C9", 2585, 2410);
         dupla("CD1", 2555, 1530, 2555, 1615);
         dupla("CD2", 1765, 2215, 1880, 2240);
-        // Karakorum: os peões ficam lado a lado na parte de baixo do escudo
+        // em Karakorum os peões ficam lado a lado na parte de baixo do escudo
         PARADAS.put(KARAKORUM, new int[][] {{1445, 1450}});
     }
 
@@ -72,12 +72,12 @@ final class CoordenadasMapa {
         return PARADAS.keySet();
     }
 
-    // círculo(s) da parada, em coordenadas da imagem original
+    // centro do(s) círculo(s) da parada, em coordenadas da imagem original
     static int[][] getPontos(String parada) {
         return PARADAS.get(parada);
     }
 
-    // nome da parada sob o ponto (x, y) da imagem original, ou null se não houver
+    // nome da parada que está no ponto (x, y) da imagem original, ou null
     static String paradaEm(double x, double y) {
         if (x >= KARAKORUM_X1 && x <= KARAKORUM_X2 && y >= KARAKORUM_Y1 && y <= KARAKORUM_Y2) {
             return KARAKORUM;

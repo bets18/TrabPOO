@@ -1,9 +1,9 @@
 package model;
 
-// qualquer lugar nomeado do tabuleiro: paradas, cidades e províncias
+// parada, cidade ou província. O nome é o que a API usa pra achar o local
 abstract class Local {
     private final String nome;
-    private final Regiao regiao; // null para Karakorum, que não pertence a nenhuma região
+    private final Regiao regiao; // Karakorum não tem região (null)
 
     Local(String nome, Regiao regiao) {
         this.nome = nome;

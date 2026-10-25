@@ -1,12 +1,8 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-// o mapa real do tabuleiro: 33 paradas (11 por região, 2 delas duplas) mais Karakorum,
-// as rotas entre elas e as 9 cidades, cada uma no centro de um anel de 3 paradas.
-// os nomes das paradas são o "contrato" com a View, que guarda onde cada uma fica na imagem.
-// R = Rússia, P = Pérsia, C = China; RD/PD/CD = paradas duplas (de conselheiro).
+// monta o mapa do tabuleiro de verdade: 33 paradas + Karakorum, as rotas e as 9 cidades.
+// Os nomes das paradas (R1, PD2, ...) são os mesmos que a View usa pra achar cada uma na imagem.
+// R = Rússia, P = Pérsia, C = China e o D indica parada dupla
 final class MapaPadrao {
     static final String KARAKORUM = "Karakorum";
 
@@ -53,17 +49,7 @@ final class MapaPadrao {
         return t;
     }
 
-    // as 9 cidades do jogo, na ordem em que foram cadastradas
-    static List<Cidade> getCidades(Tabuleiro t) {
-        List<Cidade> cidades = new ArrayList<>();
-        String[] nomes = {"Kiev", "Moscou", "Sarai", "Samarcanda", "Bagda", "Cabul", "Kaesong", "Pequim", "Cantao"};
-        for (String nome : nomes) {
-            cidades.add((Cidade) t.getLocal(nome));
-        }
-        return cidades;
-    }
-
-    // 9 paradas simples (X1..X9) e 2 duplas (XD1, XD2) por região
+    // por região: 9 simples (X1 a X9) e 2 duplas (XD1 e XD2)
     private static void adicionarParadas(Tabuleiro t, Regiao regiao, String prefixo) {
         for (int i = 1; i <= 9; i++) {
             t.adicionarLocal(new Parada(prefixo + i, regiao, TipoParada.SIMPLES));
@@ -72,7 +58,7 @@ final class MapaPadrao {
         t.adicionarLocal(new Parada(prefixo + "D2", regiao, TipoParada.DUPLA));
     }
 
-    // recebe os nomes em pares: (a, b), (c, d), ...
+    // os nomes vêm de 2 em 2: liga o 1º com o 2º, o 3º com o 4º...
     private static void rotas(Tabuleiro t, String... pares) {
         for (int i = 0; i < pares.length; i += 2) {
             t.adicionarRota((Parada) t.getLocal(pares[i]), (Parada) t.getLocal(pares[i + 1]));

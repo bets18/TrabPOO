@@ -13,6 +13,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -20,8 +22,8 @@ import javax.swing.JPanel;
 
 import model.HerdeirosDeKhanAPI;
 
-// painel lateral: mostra o jogador da vez (faixa na cor dele), o tabuleiro do herdeiro, onde ele
-// clica para ativar uma coluna, os movimentos restantes e o botão de passar a vez
+// painel da direita: faixa com a cor do jogador da vez, a cartela do herdeiro (onde ele
+// clica pra ativar a coluna), os movimentos que sobram e o botão de passar a vez
 class PainelJogador extends JPanel {
     private static final long serialVersionUID = 1L;
     static final int LARGURA = 384;
@@ -31,8 +33,8 @@ class PainelJogador extends JPanel {
     private static final int TOPO_CARTELA = 170;
     private static final int TAMANHO_FICHA = 34;
 
-    // nomes das colunas no Model e onde cada uma fica na cartela (frações da largura e da altura)
-    private static final String[] COLUNAS = {"VERMELHA", "VERDE", "AMARELA", "BRANCA"};
+    // nome de cada coluna no Model e onde ela fica na cartela (em fração da largura e da altura)
+    private static final List<String> COLUNAS = Arrays.asList("VERMELHA", "VERDE", "AMARELA", "BRANCA");
     private static final double[][] FAIXAS_X = {{0.262, 0.412}, {0.435, 0.587}, {0.609, 0.761}, {0.806, 0.956}};
     private static final double Y_INICIO = 0.11, Y_FIM = 0.92;
 
@@ -43,7 +45,7 @@ class PainelJogador extends JPanel {
     PainelJogador(HerdeirosDeKhanAPI modelo, AcoesDoJogador acoes) {
         this.modelo = modelo;
         this.acoes = acoes;
-        // o botão fica sempre na base do painel, qualquer que seja a altura da janela
+        // BorderLayout pra deixar o botão sempre embaixo, qualquer que seja a altura
         setLayout(new BorderLayout());
         setBackground(new Color(245, 236, 215));
 
@@ -56,6 +58,13 @@ class PainelJogador extends JPanel {
         add(base, BorderLayout.SOUTH);
 
         addMouseListener(new CliqueNaCartela());
+
+        // as cartelas são enormes (uns 6000 px). Carregando aqui, a janela não trava
+        // na primeira vez que aparece cada herdeiro
+        for (int i = 0; i < modelo.getNumeroDeJogadores(); i++) {
+            Imagens.carregar(EstiloJogador.getCartela(modelo.getHerdeiro(i)), LARGURA_CARTELA);
+            Imagens.carregar(EstiloJogador.getFicha(modelo.getHerdeiro(i)), TAMANHO_FICHA);
+        }
     }
 
     void atualizar() {
@@ -71,7 +80,7 @@ class PainelJogador extends JPanel {
         return new Rectangle(MARGEM, TOPO_CARTELA, cartela.getWidth(), cartela.getHeight());
     }
 
-    // retângulo da coluna i sobre a cartela, em coordenadas do painel
+    // retângulo da coluna i em cima da cartela, em coordenadas do painel
     private Rectangle areaDaColuna(Rectangle cartela, int i) {
         int x1 = cartela.x + (int) (FAIXAS_X[i][0] * cartela.width);
         int x2 = cartela.x + (int) (FAIXAS_X[i][1] * cartela.width);
@@ -88,7 +97,7 @@ class PainelJogador extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         String herdeiro = herdeiroDaVez();
 
-        // faixa com a cor do jogador da vez
+        // faixa na cor do jogador da vez
         g2.setColor(EstiloJogador.getCor(herdeiro));
         g2.fillRect(0, 0, getWidth(), 150);
         g2.setColor(Color.WHITE);
@@ -125,22 +134,22 @@ class PainelJogador extends JPanel {
         g2.drawImage(cartela, area.x, area.y, null);
 
         BufferedImage ficha = Imagens.carregar(EstiloJogador.getFicha(herdeiro), TAMANHO_FICHA);
-        for (int i = 0; i < COLUNAS.length; i++) {
+        for (int i = 0; i < COLUNAS.size(); i++) {
             Rectangle coluna = areaDaColuna(area, i);
-            boolean ativada = COLUNAS[i].equals(modelo.getColunaDoTurno());
+            boolean ativada = COLUNAS.get(i).equals(modelo.getColunaDoTurno());
             if (ativada) {
                 g2.setColor(Color.WHITE);
                 g2.setStroke(new BasicStroke(4f));
                 g2.draw(coluna);
             }
-            // ficha de ativação: colunas ocupadas e a coluna ativada neste turno
-            if (ativada || !modelo.colunaLivre(COLUNAS[i])) {
+            // ficha nas colunas já usadas e na que foi ativada agora
+            if (ativada || !modelo.colunaLivre(COLUNAS.get(i))) {
                 g2.drawImage(ficha, coluna.x + (coluna.width - TAMANHO_FICHA) / 2, coluna.y + 6, null);
             }
         }
     }
 
-    // lista de jogadores com a cor de cada um e onde está o peão
+    // lista dos jogadores com a cor e onde está cada peão
     private void desenharJogadores(Graphics2D g2) {
         int y = TOPO_CARTELA + 240;
         g2.setColor(Color.DARK_GRAY);
@@ -163,15 +172,15 @@ class PainelJogador extends JPanel {
         }
     }
 
-    // clique sobre uma das 4 colunas da cartela
+    // vê se o clique caiu em alguma das 4 colunas da cartela
     private class CliqueNaCartela extends MouseAdapter {
         @Override
         public void mousePressed(MouseEvent e) {
             BufferedImage cartela = Imagens.carregar(EstiloJogador.getCartela(herdeiroDaVez()), LARGURA_CARTELA);
             Rectangle area = areaDaCartela(cartela);
-            for (int i = 0; i < COLUNAS.length; i++) {
+            for (int i = 0; i < COLUNAS.size(); i++) {
                 if (areaDaColuna(area, i).contains(e.getPoint())) {
-                    acoes.colunaClicada(COLUNAS[i]);
+                    acoes.colunaClicada(COLUNAS.get(i));
                     return;
                 }
             }

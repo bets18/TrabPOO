@@ -30,7 +30,9 @@ public class HerdeirosDeKhanAPITest {
 
     @Test(timeout = 2000)
     public void testaSeApiExecutaJogadaUsandoApenasNomes() {
-        assertTrue(api.moverPeao(Arrays.asList("P1"), 1));
+        assertFalse("Sem coluna ativada nao tem cavalo pra andar", api.moverPara("P1"));
+        assertTrue(api.ativarColuna("VERMELHA")); // Tolui: 1 cavalo
+        assertTrue(api.moverPara("P1"));
         assertTrue(api.pegarTributo("Estepe"));
 
         assertEquals("P1", api.getPosicaoDoJogadorDaVez());
@@ -39,7 +41,9 @@ public class HerdeirosDeKhanAPITest {
 
     @Test(timeout = 2000)
     public void testaSeApiRecusaNomesInexistentesOuDeTipoErrado() {
-        assertFalse("Não existe parada chamada Atlantida.", api.moverPeao(Arrays.asList("Atlantida"), 1));
+        api.ativarColuna("VERMELHA");
+        assertFalse("Não existe parada chamada Atlantida.", api.moverPara("Atlantida"));
+        assertFalse("Estepe é uma província, não uma parada.", api.moverPara("Estepe"));
         assertFalse("Estepe é uma província, não uma parada.", api.construirYurt("Estepe"));
         assertFalse("OURO não é um tipo de tesouro.", api.atacarCidade("Estepe", "OURO"));
         assertEquals("TOLUI", api.getHerdeiroDoJogadorDaVez());

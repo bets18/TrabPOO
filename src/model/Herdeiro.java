@@ -3,8 +3,7 @@ package model;
 import java.util.HashMap;
 import java.util.Map;
 
-// os 5 tabuleiros de jogador; cada um representa um herdeiro do Khan (manual, pág. 20).
-// as ações de cada coluna foram tiradas das cartelas; a coluna branca é igual para todos.
+// os 5 herdeiros e as ações de cada coluna, copiadas das cartelas
 enum Herdeiro {
     //       vermelha                                  verde                                     amarela
     ALTANI(  new AcoesColuna(1, 2, true, false, false), new AcoesColuna(2, 1, false, false, false), new AcoesColuna(1, 1, false, true, false)),
@@ -19,7 +18,7 @@ enum Herdeiro {
         colunas.put(Coluna.VERMELHA, vermelha);
         colunas.put(Coluna.VERDE, verde);
         colunas.put(Coluna.AMARELA, amarela);
-        // branca: 2 cavalos, Khan e recuperar todas as fichas de ativação
+        // a branca é igual pra todos: 2 cavalos, khan e pega as fichas de volta
         colunas.put(Coluna.BRANCA, new AcoesColuna(2, 0, true, false, true));
     }
 

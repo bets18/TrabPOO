@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// grafo do mapa: rotas entre paradas, e quais cidades/províncias ficam adjacentes a cada parada
+// o mapa como um grafo: rotas entre as paradas e o que fica do lado de cada parada
+// (cidades e províncias)
 class Tabuleiro {
     private final Map<String, Local> locais = new HashMap<>();
     private final Map<Parada, List<Parada>> rotas = new HashMap<>();
@@ -31,17 +32,18 @@ class Tabuleiro {
         return karakorum;
     }
 
-    List<Provincia> getProvincias() {
-        List<Provincia> provincias = new ArrayList<>();
+    // todos os locais de uma classe, ex: getLocais(Cidade.class)
+    <T extends Local> List<T> getLocais(Class<T> tipo) {
+        List<T> encontrados = new ArrayList<>();
         for (Local local : locais.values()) {
-            if (local instanceof Provincia) {
-                provincias.add((Provincia) local);
+            if (tipo.isInstance(local)) {
+                encontrados.add(tipo.cast(local));
             }
         }
-        return provincias;
+        return encontrados;
     }
 
-    // rotas são de mão dupla
+    // a rota vale nos dois sentidos
     void adicionarRota(Parada a, Parada b) {
         adicionarNaLista(rotas, a, b);
         adicionarNaLista(rotas, b, a);
@@ -65,7 +67,7 @@ class Tabuleiro {
         return vizinhos != null && vizinhos.contains(local);
     }
 
-    // setas que partem do ícone do Khan: as 2 províncias que também recebem tributo
+    // as 2 províncias para onde apontam as setas do khan (fora a dele)
     void definirAfetadasPeloKhan(Provincia provinciaDoKhan, Provincia a, Provincia b) {
         List<Provincia> afetadas = new ArrayList<>();
         afetadas.add(a);

@@ -1,10 +1,10 @@
 package model;
 
-// capacidades de cada tipo de parada (manual, págs. 7 e 11)
+// quantos peões e quantos yurts cabem em cada tipo de parada
 enum TipoParada {
     SIMPLES(1, 1),
-    DUPLA(2, 2),                        // paradas de conselheiro: cabem 2 peões e 2 yurts
-    KARAKORUM(Integer.MAX_VALUE, 0);    // cabem todos os peões e não pode ter yurts
+    DUPLA(2, 2),                        // parada de conselheiro
+    KARAKORUM(Integer.MAX_VALUE, 0);    // cabe todo mundo, mas não pode ter yurt
 
     private final int capacidadePeoes;
     private final int capacidadeYurts;

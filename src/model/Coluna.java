@@ -1,6 +1,6 @@
 package model;
 
-// as 4 colunas do tabuleiro de cada herdeiro (manual, pág. 6)
+// colunas do tabuleiro do herdeiro
 enum Coluna {
     VERMELHA, VERDE, AMARELA, BRANCA
 }

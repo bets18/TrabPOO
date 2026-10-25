@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// fonte dos tesouros. Só pode ser atacada depois de revelada e enquanto não for conquistada.
+// cidade com tesouros. Só pode ser atacada depois de revelada e antes de ser conquistada
 class Cidade extends Local {
     static final int TESOUROS_AO_REVELAR = 4;
 
-    private final Map<TipoTesouro, Integer> tesouros = new HashMap<>(); // tipo -> quantidade
+    private final Map<TipoTesouro, Integer> tesouros = new HashMap<>(); // tipo -> quantas peças
     private int quantidadeTesouros = 0;
     private boolean revelada = false;
     private Jogador conquistador = null;
@@ -17,7 +17,7 @@ class Cidade extends Local {
         super(nome, regiao);
     }
 
-    // revela a cidade e coloca nela as 4 primeiras peças da pilha de tesouros
+    // tira as 4 primeiras peças da pilha e coloca na cidade
     void revelar(List<TipoTesouro> pilhaDeTesouros) {
         revelada = true;
         for (int i = 0; i < TESOUROS_AO_REVELAR && !pilhaDeTesouros.isEmpty(); i++) {

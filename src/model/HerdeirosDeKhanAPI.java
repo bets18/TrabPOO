@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// Única classe pública do pacote. View e Controller só trocam Strings e tipos primitivos
-// com o Model, nunca as classes internas. Singleton e Façade serão aplicados na 3ª iteração.
+// única classe pública do model. A View e o Controller só falam com ela, e só passam
+// String e int, nunca as classes de dentro do pacote. Singleton fica pra 3ª iteração
 public class HerdeirosDeKhanAPI {
     private final Jogo jogo;
 
+    // usado nos testes, com um tabuleiro montado à mão
     HerdeirosDeKhanAPI(Jogo jogo) {
         this.jogo = jogo;
     }
 
-    // nova partida no mapa real, com os herdeiros na ordem de jogo (ex.: "ALTANI", "JOCHI").
-    // as cidades e os tesouros são embaralhados aqui, na preparação (manual, págs. 3 e 4).
+    // partida nova no mapa de verdade. Os nomes vêm na ordem de jogo, ex: "ALTANI", "JOCHI"
     public HerdeirosDeKhanAPI(List<String> herdeirosNaOrdemDeJogo) {
         List<Herdeiro> herdeiros = new ArrayList<>();
         for (String nome : herdeirosNaOrdemDeJogo) {
@@ -27,11 +27,12 @@ public class HerdeirosDeKhanAPI {
         Tabuleiro tabuleiro = MapaPadrao.criar();
         jogo = new Jogo(tabuleiro, herdeiros);
 
-        List<Cidade> cidades = MapaPadrao.getCidades(tabuleiro);
+        // embaralha as cidades e os tesouros (8 de cada tipo) antes de revelar
+        List<Cidade> cidades = tabuleiro.getLocais(Cidade.class);
         List<TipoTesouro> tesouros = new ArrayList<>();
         for (TipoTesouro tipo : TipoTesouro.values()) {
             for (int i = 0; i < 8; i++) {
-                tesouros.add(tipo); // 8 peças de cada tipo
+                tesouros.add(tipo);
             }
         }
         Collections.shuffle(cidades);
@@ -39,7 +40,7 @@ public class HerdeirosDeKhanAPI {
         jogo.prepararCidades(cidades, tesouros);
     }
 
-    // jogadores, por índice na ordem de jogo
+    // os jogadores são identificados pelo índice na ordem de jogo
 
     public int getIndiceJogadorDaVez() {
         return jogo.getIndiceJogadorDaVez();
@@ -49,12 +50,12 @@ public class HerdeirosDeKhanAPI {
         return jogo.getJogador(indiceJogador).getHerdeiro().name();
     }
 
-    // posição do peão ativo do jogador
+    // posição do peão ativo
     public String getPosicao(int indiceJogador) {
         return jogo.getJogador(indiceJogador).getPosicao().getNome();
     }
 
-    // só Altani tem 2 peões
+    // só a Altani tem 2
     public int getNumeroDePeoes(int indiceJogador) {
         return jogo.getJogador(indiceJogador).getNumeroDePeoes();
     }
@@ -67,12 +68,12 @@ public class HerdeirosDeKhanAPI {
         return jogo.getJogador(indiceJogador).getPeaoAtivo();
     }
 
-    // Altani: troca o peão que vai mover (antes de mover neste turno)
+    // Altani: troca o peão que vai jogar (só antes de andar)
     public boolean selecionarPeao(int peao) {
         return jogo.selecionarPeao(peao);
     }
 
-    // herdeiros donos dos yurts desta parada (um nome por yurt)
+    // um nome de herdeiro por yurt que está na parada
     public List<String> getDonosDeYurts(String nomeDaParada) {
         List<String> donos = new ArrayList<>();
         Parada parada = buscar(Parada.class, nomeDaParada);
@@ -84,26 +85,20 @@ public class HerdeirosDeKhanAPI {
         return donos;
     }
 
-    // peão do jogador da vez, que não seja o ativo, nesta parada; -1 se não houver
-    public int getPeaoInativoEm(String nomeDaParada) {
-        Parada parada = buscar(Parada.class, nomeDaParada);
-        return parada == null ? -1 : jogo.peaoInativoEm(parada);
-    }
-
-    // turno: ativar coluna, mover, encerrar
+    // turno: ativar coluna, mover e passar a vez
 
     public boolean ativarColuna(String coluna) {
         Coluna c = converter(Coluna.class, coluna);
         return c != null && jogo.ativarColuna(c);
     }
 
-    // a coluna pode ser ativada pelo jogador da vez (não tem ficha dele)?
+    // true se o jogador da vez ainda não tem ficha nessa coluna
     public boolean colunaLivre(String coluna) {
         Coluna c = converter(Coluna.class, coluna);
         return c != null && jogo.getJogadorDaVez().podeAtivar(c);
     }
 
-    // null enquanto o jogador da vez não ativou nenhuma coluna
+    // null enquanto não ativou coluna
     public String getColunaDoTurno() {
         Coluna c = jogo.getColunaDoTurno();
         return c == null ? null : c.name();
@@ -113,7 +108,7 @@ public class HerdeirosDeKhanAPI {
         return jogo.getMovimentosRestantes();
     }
 
-    // move o peão da vez até a parada clicada pelo caminho mais curto, se couber nos cavalos
+    // anda até a parada clicada pelo caminho mais curto, se der com os cavalos que sobraram
     public boolean moverPara(String nomeDaParada) {
         Parada parada = buscar(Parada.class, nomeDaParada);
         return parada != null && jogo.moverPara(parada);
@@ -136,21 +131,9 @@ public class HerdeirosDeKhanAPI {
         return tipo == null ? 0 : jogo.getJogadorDaVez().getQuantidadeTributo(tipo);
     }
 
-    // só passa a vez depois que o jogador ativou uma coluna
+    // só passa depois de ativar uma coluna
     public boolean passarVez() {
         return jogo.encerrarTurno();
-    }
-
-    public boolean moverPeao(List<String> nomesDasParadas, int movimentosDisponiveis) {
-        List<Parada> caminho = new ArrayList<>();
-        for (String nome : nomesDasParadas) {
-            Parada parada = buscar(Parada.class, nome);
-            if (parada == null) {
-                return false;
-            }
-            caminho.add(parada);
-        }
-        return jogo.moverPeao(caminho, movimentosDisponiveis);
     }
 
     public boolean pegarTributo(String nomeDaProvincia) {
@@ -178,12 +161,13 @@ public class HerdeirosDeKhanAPI {
         return jogo.fimDeJogoDisparado();
     }
 
-    // retorna null se o local não existir ou não for do tipo esperado
+    // null se não existir local com esse nome ou se for de outro tipo
     private <T extends Local> T buscar(Class<T> classe, String nome) {
         Local local = jogo.getTabuleiro().getLocal(nome);
         return classe.isInstance(local) ? classe.cast(local) : null;
     }
 
+    // null se o texto não for um valor do enum
     private static <E extends Enum<E>> E converter(Class<E> classe, String nome) {
         try {
             return Enum.valueOf(classe, nome);

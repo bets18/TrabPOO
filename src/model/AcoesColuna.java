@@ -1,7 +1,7 @@
 package model;
 
-// ações impressas na base de uma coluna do tabuleiro do herdeiro: cavalos (movimentos),
-// punhos (pegar tributo), Khan, moeda virtual e, só na coluna branca, recuperar as fichas
+// o que vem impresso embaixo de cada coluna: cavalos, punhos, khan, moeda virtual
+// e, só na branca, recuperar as fichas
 class AcoesColuna {
     private final int cavalos;
     private final int punhos;

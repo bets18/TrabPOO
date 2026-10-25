@@ -11,10 +11,9 @@ import javax.swing.JFrame;
 
 import model.HerdeirosDeKhanAPI;
 
-// janela da partida: tabuleiro à esquerda e painel do jogador da vez à direita.
-// o PDF limita as janelas a 1400 x 1050 pixels: a janela abre no maior tamanho permitido que
-// caiba na área útil da tela (sem ficar atrás da barra de tarefas) e pode ser redimensionada
-// ou maximizada, mas nunca passa desse limite.
+// janela da partida: tabuleiro na esquerda e painel do jogador da vez na direita.
+// O enunciado limita a janela a 1400 x 1050, então ela abre no maior tamanho que cabe
+// na tela (sem ficar atrás da barra de tarefas) e nunca passa desse limite, nem maximizada
 public class JanelaJogo extends JFrame {
     private static final long serialVersionUID = 1L;
     public static final int LARGURA_MAXIMA = 1400;
@@ -29,7 +28,7 @@ public class JanelaJogo extends JFrame {
         super("Herdeiros de Khan");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // área da tela sem a barra de tarefas
+        // área da tela tirando a barra de tarefas
         Rectangle area = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         int largura = Math.min(LARGURA_MAXIMA, area.width);
         int altura = Math.min(ALTURA_MAXIMA, area.height);
@@ -38,7 +37,7 @@ public class JanelaJogo extends JFrame {
         setBounds(x, y, largura, altura);
         setResizable(true);
         setMinimumSize(new Dimension(Math.min(LARGURA_MINIMA, largura), Math.min(ALTURA_MINIMA, altura)));
-        // maximizar ocupa no máximo 1400 x 1050, centralizado no topo da área útil
+        // maximizada também fica no limite de 1400 x 1050
         setMaximizedBounds(new Rectangle(x, area.y, largura, altura));
         addComponentListener(new LimiteDeTamanho());
 
@@ -52,13 +51,13 @@ public class JanelaJogo extends JFrame {
         atualizar();
     }
 
-    // redesenha tudo depois de uma jogada
+    // redesenha depois de cada jogada
     public void atualizar() {
         painelJogador.atualizar();
         painelTabuleiro.repaint();
     }
 
-    // se o jogador arrastar a borda além de 1400 x 1050, a janela volta para o limite
+    // se arrastarem a borda além do limite, a janela volta pro tamanho máximo
     private class LimiteDeTamanho extends ComponentAdapter {
         @Override
         public void componentResized(ComponentEvent e) {

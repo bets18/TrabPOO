@@ -1,11 +1,11 @@
 package model;
 
-// Área entre as rotas que fornece um único tipo de tributo (o ícone impresso no tabuleiro)
+// área entre as rotas. Cada uma dá um tipo só de tributo (o ícone desenhado nela)
 class Provincia extends Local {
     static final int MAX_TRIBUTOS = 3;
 
     private final TipoTributo tipo;
-    private final boolean doKhan; // províncias com o ícone da cabeça do Khan
+    private final boolean doKhan; // tem a cabeça do khan desenhada
     private int quantidade = 0;
 
     Provincia(String nome, Regiao regiao, TipoTributo tipo, boolean doKhan) {
@@ -26,7 +26,7 @@ class Provincia extends Local {
         return quantidade;
     }
 
-    // retorna false se a província já estiver no máximo (3 peças); nesse caso nada muda
+    // false se já tem 3
     boolean adicionarTributo() {
         if (quantidade >= MAX_TRIBUTOS) {
             return false;

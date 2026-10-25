@@ -1,11 +1,14 @@
 package view;
 
-// o que a View avisa quando o jogador clica em algo. O Controller implementa esta interface;
-// assim a View não depende do Controller, só desta "porta".
+// cliques que a View repassa. O Controller implementa essa interface, assim a View
+// não precisa conhecer o Controller
 public interface AcoesDoJogador {
     void colunaClicada(String coluna);
 
     void paradaClicada(String parada);
+
+    // clique em cima do peão que não está jogando (só a Altani tem 2)
+    void peaoClicado(int peao);
 
     void passarVezClicado();
 }

@@ -58,6 +58,7 @@ public class MapaPadraoTest {
         assertTrue(t.saoVizinhos((Parada) t.getLocal("C5"), pequim));
         assertTrue(t.saoVizinhos((Parada) t.getLocal("C6"), pequim));
         assertFalse("C7 é de Cantão, não de Pequim", t.saoVizinhos((Parada) t.getLocal("C7"), pequim));
-        assertEquals("O jogo tem 9 cidades", 9, MapaPadrao.getCidades(t).size());
+        assertEquals("O jogo tem 9 cidades", 9, t.getLocais(Cidade.class).size());
+        assertTrue("Pequim tinha que estar na lista", t.getLocais(Cidade.class).contains(pequim));
     }
 }

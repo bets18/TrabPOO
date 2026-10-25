@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// espaço de movimento dos peões
+// parada do mapa, onde os peões andam
 class Parada extends Local {
     private final TipoParada tipo;
     private final List<Jogador> peoes = new ArrayList<>();
-    private final Map<Jogador, Integer> yurtsPorDono = new HashMap<>(); // dono -> quantidade
+    private final Map<Jogador, Integer> yurtsPorDono = new HashMap<>(); // dono -> quantos yurts
     private int quantidadeYurts = 0;
 
     Parada(String nome, Regiao regiao, TipoParada tipo) {
@@ -48,8 +48,8 @@ class Parada extends Local {
         quantidadeYurts++;
     }
 
-    // o yurt inicial do Tolui em Karakorum: Karakorum não aceita yurts construídos, mas este
-    // vem da preparação (pág. 20) e só serve para o Tolui pular Karakorum ao se mover
+    // só pro yurt que o Tolui já começa em Karakorum. Karakorum não aceita yurt
+    // construído, então esse não passa pela checagem de espaço
     void adicionarYurtInicial(Jogador dono) {
         yurtsPorDono.put(dono, yurtsPorDono.getOrDefault(dono, 0) + 1);
         quantidadeYurts++;
@@ -59,7 +59,7 @@ class Parada extends Local {
         return yurtsPorDono.containsKey(jogador);
     }
 
-    // um elemento por yurt (o mesmo dono aparece duas vezes se tiver 2 yurts aqui)
+    // um item por yurt (se alguém tem 2 aqui, aparece 2 vezes)
     List<Jogador> getDonosDosYurts() {
         List<Jogador> donos = new ArrayList<>();
         for (Map.Entry<Jogador, Integer> entrada : yurtsPorDono.entrySet()) {

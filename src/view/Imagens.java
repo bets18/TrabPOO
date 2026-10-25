@@ -10,8 +10,8 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-// carrega as imagens da pasta assets uma única vez, já reduzidas para o tamanho de exibição
-// (as originais têm até 6000 px). A chave do cache é o caminho + a largura pedida.
+// lê as imagens da pasta assets uma vez só e já guarda reduzidas, porque as originais
+// têm até 6000 px. A chave do cache é o caminho junto com a largura
 final class Imagens {
     private static final String PASTA = "assets/";
     private static final Map<String, BufferedImage> CACHE = new HashMap<>();
