@@ -51,6 +51,10 @@ class Cidade extends Local {
         return tesouros.getOrDefault(tipo, 0) > 0;
     }
 
+    int getQuantidadeDe(TipoTesouro tipo) {
+        return tesouros.getOrDefault(tipo, 0);
+    }
+
     boolean removerTesouro(TipoTesouro tipo) {
         if (!possuiTesouro(tipo)) {
             return false;

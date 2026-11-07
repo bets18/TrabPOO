@@ -163,6 +163,7 @@ public class JogoTest {
     @Test(timeout = 2000)
     public void testaSePularProprioYurtLevaAParadaSeguinteEmUmMovimento() {
         Jogo jogo = criarJogoComYurtDoAltaniEmP1();
+        jogo.ativarColuna(Coluna.VERMELHA); // Altani: 2 punhos
 
         assertTrue("Pular proprio yurt custa 1 mov", jogo.moverPeao(Arrays.asList(p2), 1));
         assertFalse("P1 pulada n da tributo", jogo.pegarTributo(provEspada));
@@ -171,6 +172,7 @@ public class JogoTest {
     @Test(timeout = 2000)
     public void testaSePularYurtEOpcionalPermitindoPararNele() {
         Jogo jogo = criarJogoComYurtDoAltaniEmP1();
+        jogo.ativarColuna(Coluna.VERMELHA); // Altani: 2 punhos
 
         assertTrue("Pode escolher parar msm tendo yurt", jogo.moverPeao(Arrays.asList(p1, p2), 2));
         assertTrue("Parou em P1, entao pega tributo", jogo.pegarTributo(provEspada));
@@ -189,6 +191,7 @@ public class JogoTest {
     @Test(timeout = 2000)
     public void testaSeTributoSoPodeSerPegoDeProvinciaAdjacenteAParadaDoTurno() {
         Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        jogo.ativarColuna(Coluna.VERMELHA); // Altani: 2 punhos
 
         assertFalse("Karakorum não é adjacente a ProvEspada.", jogo.pegarTributo(provEspada));
 
@@ -197,6 +200,20 @@ public class JogoTest {
         assertTrue("P1 foi uma parada do turno, então ProvEspada deveria ceder o tributo.", jogo.pegarTributo(provEspada));
         assertEquals("O jogador deveria ter recebido 1 espada.", 1, jogo.getJogadorDaVez().getQuantidadeTributo(TipoTributo.ESPADA));
         assertFalse("ProvEspada ficou vazia e não pode ceder outro tributo.", jogo.pegarTributo(provEspada));
+    }
+
+    @Test(timeout = 2000)
+    public void testaSeCadaPunhoDaColunaPegaUmTributoSo() {
+        Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        provEspada.adicionarTributo(); // 2 espadas na província
+        jogo.moverPeao(Arrays.asList(p1), 1);
+
+        assertFalse("Sem coluna ativada não há punho", jogo.pegarTributo(provEspada));
+
+        jogo.ativarColuna(Coluna.VERDE); // Altani: 2 cavalos e 1 punho
+        assertTrue(jogo.pegarTributo(provEspada));
+        assertFalse("O único punho já foi usado", jogo.pegarTributo(provEspada));
+        assertEquals("Ainda sobrou 1 espada na província", 1, provEspada.getQuantidade());
     }
 
     //  atacar cidades
@@ -250,6 +267,7 @@ public class JogoTest {
         Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
         provMoeda.adicionarTributo();
         provMoeda.adicionarTributo(); // provMoeda já está no máximo (3)
+        jogo.ativarColuna(Coluna.VERMELHA); // Altani: vermelha tem o khan
 
         assertTrue(jogo.moverKhan(provEspada));
 
@@ -261,11 +279,28 @@ public class JogoTest {
     @Test(timeout = 2000)
     public void testaSeKhanNaoPodePermanecerNaMesmaProvinciaNemIrParaProvinciaComum() {
         Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        jogo.ativarColuna(Coluna.VERMELHA); // Altani: khan
         jogo.moverKhan(provEspada);
+        jogo.encerrarTurno();
+        jogo.ativarColuna(Coluna.VERMELHA); // Chagatai: khan
 
         assertFalse("O Khan não pode ser mantido onde está.", jogo.moverKhan(provEspada));
         assertFalse("ProvYurt não tem o ícone do Khan.", jogo.moverKhan(provYurt));
         assertTrue("O Khan pode ir para outra província do Khan.", jogo.moverKhan(provKhan2));
+    }
+
+    @Test(timeout = 2000)
+    public void testaSeKhanEObrigatorioSoQuandoAColunaTemOKhan() {
+        Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        jogo.ativarColuna(Coluna.VERDE); // Altani: verde não tem khan
+
+        assertFalse("Coluna sem khan não deixa mover o khan", jogo.moverKhan(provEspada));
+        assertTrue(jogo.encerrarTurno());
+
+        jogo.ativarColuna(Coluna.VERMELHA); // Chagatai: vermelha tem khan
+        assertFalse("Não passa a vez sem mover o khan", jogo.encerrarTurno());
+        assertTrue(jogo.moverKhan(provEspada));
+        assertTrue(jogo.encerrarTurno());
     }
 
     //  yurts

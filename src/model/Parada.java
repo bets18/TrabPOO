@@ -59,6 +59,10 @@ class Parada extends Local {
         return yurtsPorDono.containsKey(jogador);
     }
 
+    int getQuantidadeYurtsDe(Jogador jogador) {
+        return yurtsPorDono.getOrDefault(jogador, 0);
+    }
+
     // um item por yurt (se alguém tem 2 aqui, aparece 2 vezes)
     List<Jogador> getDonosDosYurts() {
         List<Jogador> donos = new ArrayList<>();

@@ -25,7 +25,40 @@ public class HerdeirosDeKhanAPITest {
         tabuleiro.adicionarLocal(estepe);
         tabuleiro.adicionarRota(karakorum, p1);
         tabuleiro.adicionarVizinhanca(p1, estepe);
-        api = new HerdeirosDeKhanAPI(new Jogo(tabuleiro, Arrays.asList(Herdeiro.TOLUI, Herdeiro.ALTANI)));
+        api = HerdeirosDeKhanAPI.getInstancia();
+        api.iniciarPartida(new Jogo(tabuleiro, Arrays.asList(Herdeiro.TOLUI, Herdeiro.ALTANI)));
+    }
+
+    @Test(timeout = 2000)
+    public void testaSeApiEUmaInstanciaSo() {
+        assertSame("Singleton: getInstancia sempre devolve o mesmo objeto", api, HerdeirosDeKhanAPI.getInstancia());
+    }
+
+    // observador de teste que só guarda os eventos recebidos
+    private static class Espiao implements ObservadorIF {
+        private final java.util.List<String> eventos = new java.util.ArrayList<>();
+
+        @Override
+        public void notificar(ObservadoIF observado, String evento) {
+            eventos.add(evento);
+        }
+    }
+
+    @Test(timeout = 2000)
+    public void testaSeObservadorEAvisadoSoQuandoAJogadaDaCerto() {
+        Espiao espiao = new Espiao();
+        api.adicionarObservador(espiao);
+        try {
+            assertFalse(api.moverPara("P1")); // sem cavalos
+            assertTrue(api.ativarColuna("VERMELHA"));
+            assertTrue(api.moverPara("P1"));
+            api.exibirCartas();
+
+            assertEquals(Arrays.asList(HerdeirosDeKhanAPI.EVENTO_COLUNA_ATIVADA, HerdeirosDeKhanAPI.EVENTO_PEAO_MOVIDO,
+                    HerdeirosDeKhanAPI.EVENTO_JANELA_DE_CARTAS), espiao.eventos);
+        } finally {
+            api.removerObservador(espiao);
+        }
     }
 
     @Test(timeout = 2000)

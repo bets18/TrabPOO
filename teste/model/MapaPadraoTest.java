@@ -61,4 +61,36 @@ public class MapaPadraoTest {
         assertEquals("O jogo tem 9 cidades", 9, t.getLocais(Cidade.class).size());
         assertTrue("Pequim tinha que estar na lista", t.getLocais(Cidade.class).contains(pequim));
     }
+
+    @Test(timeout = 2000)
+    public void testaSeMapaTem12ProvinciasDeTributoE4DoKhanComTresSetasCada() {
+        Tabuleiro t = MapaPadrao.criar();
+        int doKhan = 0;
+        for (Provincia provincia : t.getLocais(Provincia.class)) {
+            if (provincia.isDoKhan()) {
+                doKhan++;
+                assertNull("Província do Khan não dá tributo", provincia.getTipo());
+                assertEquals("Cada Khan tem 3 setas", 3, t.getAfetadasPeloKhan(provincia).size());
+            }
+            assertFalse("Província " + provincia.getNome() + " sem paradas em volta",
+                    t.getParadasAdjacentes(provincia).isEmpty());
+        }
+        assertEquals(4, doKhan);
+        assertEquals(16, t.getLocais(Provincia.class).size());
+        assertTrue("R1 fica na borda da província de espada de cima",
+                t.saoVizinhos((Parada) t.getLocal("R1"), t.getLocal("Espada1")));
+    }
+
+    @Test(timeout = 2000)
+    public void testaSeConselheirosFicamNasParadasDuplasEEmKarakorum() {
+        Tabuleiro t = MapaPadrao.criar();
+
+        assertEquals(7, t.getConselheiros().size());
+        for (Conselheiro conselheiro : t.getConselheiros()) {
+            TipoParada tipo = conselheiro.getParada().getTipo();
+            assertTrue(tipo == TipoParada.DUPLA || tipo == TipoParada.KARAKORUM);
+        }
+        assertEquals("Karakorum dá 2 votos", 2, t.getConselheiro(t.getKarakorum()).getVotos());
+        assertTrue("CD2 aceita 3 tesouros quaisquer", t.getConselheiro((Parada) t.getLocal("CD2")).aceitaQualquer());
+    }
 }

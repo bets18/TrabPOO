@@ -80,9 +80,11 @@ public class TurnoTest {
         Jogador altani = jogo.getJogadorDaVez();
         jogo.ativarColuna(Coluna.VERMELHA); // 1 cavalo, peao 1 vai pra R8
         jogo.moverPara(parada("R8"));
-        jogo.encerrarTurno();
+        jogo.moverKhan((Provincia) t.getLocal("Khan1")); // a vermelha da Altani tem khan
+        assertTrue(jogo.encerrarTurno());
         jogo.ativarColuna(Coluna.BRANCA); // Ogedei
-        jogo.encerrarTurno();
+        jogo.moverKhanParaAreaDeMelhorias(); // a branca também tem khan
+        assertTrue(jogo.encerrarTurno());
         jogo.ativarColuna(Coluna.VERDE);
 
         assertTrue("Karakorum cabe todo mundo, ate o outro peao", jogo.moverPara(t.getKarakorum()));
@@ -99,9 +101,10 @@ public class TurnoTest {
 
         comTolui.ativarColuna(Coluna.VERMELHA); // 1 cavalo
         comTolui.moverPara(parada("R8"));
-        comTolui.encerrarTurno();
+        assertTrue(comTolui.encerrarTurno());
         comTolui.ativarColuna(Coluna.BRANCA); // Ogedei
-        comTolui.encerrarTurno();
+        comTolui.moverKhanParaAreaDeMelhorias(); // a branca tem khan
+        assertTrue(comTolui.encerrarTurno());
         comTolui.ativarColuna(Coluna.VERDE); // Tolui: 2 cavalos
 
         assertTrue(comTolui.moverPara(parada("C4")));
@@ -112,9 +115,11 @@ public class TurnoTest {
     public void testaSeOutroHerdeiroGastaDoisMovimentosPassandoPorKarakorum() {
         jogo.ativarColuna(Coluna.VERMELHA); // Altani: 1 cavalo
         jogo.moverPara(parada("R8"));
-        jogo.encerrarTurno();
+        jogo.moverKhan((Provincia) t.getLocal("Khan1")); // a vermelha da Altani tem khan
+        assertTrue(jogo.encerrarTurno());
         jogo.ativarColuna(Coluna.BRANCA); // Ogedei
-        jogo.encerrarTurno();
+        jogo.moverKhanParaAreaDeMelhorias(); // a branca também tem khan
+        assertTrue(jogo.encerrarTurno());
         jogo.ativarColuna(Coluna.VERDE); // Altani: 2 cavalos
 
         assertTrue(jogo.moverPara(parada("C4")));
