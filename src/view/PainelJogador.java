@@ -31,7 +31,7 @@ class PainelJogador extends JPanel implements ObservadorIF {
     static final int LARGURA = 384;
 
     private static final Color FUNDO = new Color(245, 236, 215);
-    private static final int ALTURA_DA_FAIXA = 172;
+    private static final int ALTURA_DA_FAIXA = 196;
     private static final int LARGURA_MAXIMA_DA_CARTA = 84;
     private static final double PROPORCAO_DA_CARTA = 1.6; // altura / largura
 
