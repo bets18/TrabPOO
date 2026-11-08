@@ -46,6 +46,12 @@ class Jogo {
     private boolean khanNaAreaDeMelhorias = false;
     private int votosNoConselho = 0;            // ficha neutra
 
+    // reserva de peças de tributo ao lado do tabuleiro: 10 espadas, 10 yurts e 15 moedas (pág. 2).
+    // Tudo que entra no jogo sai daqui e tudo que é gasto volta pra cá; acabou, acabou
+    private final Map<TipoTributo, Integer> reserva = new HashMap<>();
+    // a escolha das cartas secretas só vale antes da 1ª rodada
+    private boolean partidaComecou = false;
+
     // fim de jogo: termina a rodada em que disparou e joga mais uma completa
     private boolean fimDisparado = false;
     private boolean ultimaRodada = false;
@@ -88,11 +94,14 @@ class Jogo {
             throw new IllegalStateException("O tabuleiro precisa ter Karakorum.");
         }
         this.tabuleiro = tabuleiro;
+        reserva.put(TipoTributo.ESPADA, 10);
+        reserva.put(TipoTributo.YURT, 10);
+        reserva.put(TipoTributo.MOEDA, 15);
 
         for (int i = 0; i < herdeirosNaOrdemDeJogo.size(); i++) {
             Jogador jogador = new Jogador(herdeirosNaOrdemDeJogo.get(i));
             // os dois primeiros começam com 1 moeda, o resto com 2
-            jogador.adicionarTributos(TipoTributo.MOEDA, i < 2 ? 1 : 2);
+            darDaReserva(jogador, TipoTributo.MOEDA, i < 2 ? 1 : 2);
             for (int peao = 0; peao < jogador.getNumeroDePeoes(); peao++) {
                 tabuleiro.getKarakorum().adicionarPeao(jogador);
                 jogador.setPosicaoDoPeao(peao, tabuleiro.getKarakorum());
@@ -107,10 +116,32 @@ class Jogo {
 
         // 1 tributo em cada província (as do Khan não têm tributo)
         for (Provincia provincia : tabuleiro.getLocais(Provincia.class)) {
-            provincia.adicionarTributo();
+            abastecer(provincia);
         }
 
         iniciarTurno();
+    }
+
+    //  reserva de tributos
+
+    int getNaReserva(TipoTributo tipo) {
+        return reserva.get(tipo);
+    }
+
+    // dá ao jogador até a quantidade pedida, se tiver na reserva; devolve quantas deu
+    private int darDaReserva(Jogador jogador, TipoTributo tipo, int quantidade) {
+        int dadas = Math.min(quantidade, reserva.get(tipo));
+        reserva.put(tipo, reserva.get(tipo) - dadas);
+        jogador.adicionarTributos(tipo, dadas);
+        return dadas;
+    }
+
+    // põe 1 peça do tipo da província, se ela ainda tiver espaço e a reserva tiver a peça
+    private void abastecer(Provincia provincia) {
+        TipoTributo tipo = provincia.getTipo();
+        if (tipo != null && reserva.get(tipo) > 0 && provincia.adicionarTributo()) {
+            reserva.put(tipo, reserva.get(tipo) - 1);
+        }
     }
 
     //  preparação (as listas já chegam embaralhadas)
@@ -133,12 +164,9 @@ class Jogo {
         areaDeMelhorias = new AreaDeMelhorias(melhoriasEmbaralhadas);
         for (Jogador jogador : jogadores) {
             if (jogador.getHerdeiro() == Herdeiro.JOCHI) {
-                Melhoria branca = areaDeMelhorias.retirar(AreaDeMelhorias.TOPO_DA_PILHA);
-                Melhoria escolhida = areaDeMelhorias.retirar(AreaDeMelhorias.TOPO_DA_PILHA);
-                if (branca != null) {
-                    jogador.adicionarMelhoria(Coluna.BRANCA, branca);
-                }
-                jogador.setMelhoriaParaPosicionar(escolhida);
+                // as 2 ficam esperando: ele decide qual vai pra coluna branca (posicionarMelhoria)
+                jogador.setMelhoriaParaPosicionar(areaDeMelhorias.retirar(AreaDeMelhorias.TOPO_DA_PILHA));
+                jogador.setOutraMelhoriaInicial(areaDeMelhorias.retirar(AreaDeMelhorias.TOPO_DA_PILHA));
             }
         }
     }
@@ -229,8 +257,9 @@ class Jogo {
         return habilidadeUsada;
     }
 
+    // se não sobrou nenhuma melhoria no jogo, a grátis se perde (senão o turno travaria)
     boolean isMelhoriaGratisPendente() {
-        return !linhasComMelhoriaGratis.isEmpty();
+        return !linhasComMelhoriaGratis.isEmpty() && areaDeMelhorias.temMelhoria();
     }
 
     List<TipoTesouro> getTesourosParaEscolher() {
@@ -299,7 +328,7 @@ class Jogo {
     boolean podeEncerrarTurno() {
         return !terminado && colunaDoTurno != null && !khanPendente
                 && getJogadorDaVez().getMelhoriaParaPosicionar() == null
-                && linhasComMelhoriaGratis.isEmpty() && tesourosParaEscolher.isEmpty();
+                && !isMelhoriaGratisPendente() && tesourosParaEscolher.isEmpty();
     }
 
     boolean encerrarTurno() {
@@ -317,9 +346,10 @@ class Jogo {
     // não pode ser coluna que já tem ficha
     boolean ativarColuna(Coluna coluna) {
         Jogador jogador = getJogadorDaVez();
-        if (terminado || colunaDoTurno != null || !jogador.podeAtivar(coluna)) {
+        if (terminado || colunaDoTurno != null || !jogador.podeAtivar(coluna) || !cartasSecretasEscolhidas()) {
             return false;
         }
+        partidaComecou = true;
         AcoesColuna acoes = jogador.getHerdeiro().getAcoes(coluna);
         colunaDoTurno = coluna;
         movimentosRestantes += acoes.getCavalos();
@@ -397,6 +427,7 @@ class Jogo {
                 yurtsVirtuais -= virtuais;
         }
         getJogadorDaVez().gastarTributos(tipo, quantidade - virtuais);
+        reserva.put(tipo, reserva.get(tipo) + quantidade - virtuais); // peça usada volta pra reserva
     }
 
     // Altani: escolhe qual dos 2 peões vai jogar. Depois que andou ou agiu não troca mais
@@ -415,11 +446,12 @@ class Jogo {
     // Chagatai: 1x por turno deixa de usar 1 cavalo e ganha 1 espada
     boolean trocarCavaloPorEspada() {
         Jogador jogador = getJogadorDaVez();
-        if (terminado || jogador.getHerdeiro() != Herdeiro.CHAGATAI || habilidadeUsada || movimentosRestantes == 0) {
+        if (terminado || jogador.getHerdeiro() != Herdeiro.CHAGATAI || habilidadeUsada || movimentosRestantes == 0
+                || reserva.get(TipoTributo.ESPADA) == 0) {
             return false;
         }
         movimentosRestantes--;
-        jogador.adicionarTributos(TipoTributo.ESPADA, 1);
+        darDaReserva(jogador, TipoTributo.ESPADA, 1);
         habilidadeUsada = true;
         verificarCartasAbertas();
         return true;
@@ -569,9 +601,9 @@ class Jogo {
         provinciaDoKhan = destino;
         khanNaAreaDeMelhorias = false;
         khanPendente = false;
-        destino.adicionarTributo();
+        abastecer(destino);
         for (Provincia afetada : tabuleiro.getAfetadasPeloKhan(destino)) {
-            afetada.adicionarTributo();
+            abastecer(afetada);
         }
         return true;
     }
@@ -584,10 +616,10 @@ class Jogo {
         }
         Jogador jogador = getJogadorDaVez();
         if (areaDeMelhorias.espacoVazio(AreaDeMelhorias.ESPACO_DA_MOEDA)) {
-            jogador.adicionarTributos(TipoTributo.MOEDA, 1);
+            darDaReserva(jogador, TipoTributo.MOEDA, 1);
         }
         if (areaDeMelhorias.espacoVazio(AreaDeMelhorias.ESPACO_DA_ESPADA)) {
-            jogador.adicionarTributos(TipoTributo.ESPADA, 1);
+            darDaReserva(jogador, TipoTributo.ESPADA, 1);
         }
         areaDeMelhorias.repor();
         khanNaAreaDeMelhorias = true;
@@ -657,7 +689,10 @@ class Jogo {
         if (cidade.getQuantidadeTesouros() == 0) {
             cidade.conquistar(jogador);
             jogador.conquistarCidade();
-            jogador.retirarYurtDoEstoque(); // vai pro meio da cidade
+            // um yurt dele vai pro meio da cidade; sem yurts no estoque, conquista sem o yurt
+            if (jogador.retirarYurtDoEstoque()) {
+                cidade.colocarYurtDoConquistador();
+            }
             if (!cidadesOcultas.isEmpty()) {
                 cidadesOcultas.remove(0).revelar(pilhaDeTesouros);
             }
@@ -727,9 +762,36 @@ class Jogo {
     boolean posicionarMelhoria(Coluna coluna) {
         Jogador jogador = getJogadorDaVez();
         Melhoria melhoria = jogador.getMelhoriaParaPosicionar();
-        if (terminado || melhoria == null || !coluna.isColorida() || !jogador.temEspacoNaColuna(coluna)) {
+        if (terminado || melhoria == null) {
             return false;
         }
+        Melhoria outraInicial = jogador.getOutraMelhoriaInicial();
+        if (outraInicial != null) {
+            return posicionarMelhoriaInicialDoJochi(jogador, melhoria, outraInicial, coluna);
+        }
+        if (!coluna.isColorida() || !jogador.temEspacoNaColuna(coluna)) {
+            return false;
+        }
+        jogador.setMelhoriaParaPosicionar(null);
+        colocarMelhoria(jogador, melhoria, coluna);
+        return true;
+    }
+
+    // Jochi, início do jogo: das 2 melhorias, uma vai pra coluna branca e a outra pra uma colorida.
+    // Clicando na branca, a 1ª vai pra lá e ele ainda escolhe a coluna da 2ª; clicando numa
+    // colorida, a 1ª vai pra ela e a 2ª vai pra branca
+    private boolean posicionarMelhoriaInicialDoJochi(Jogador jogador, Melhoria melhoria, Melhoria outra, Coluna coluna) {
+        if (coluna == Coluna.BRANCA) {
+            jogador.setOutraMelhoriaInicial(null);
+            jogador.adicionarMelhoria(Coluna.BRANCA, melhoria);
+            jogador.setMelhoriaParaPosicionar(outra);
+            return true;
+        }
+        if (!jogador.temEspacoNaColuna(coluna)) {
+            return false;
+        }
+        jogador.setOutraMelhoriaInicial(null);
+        jogador.adicionarMelhoria(Coluna.BRANCA, outra);
         jogador.setMelhoriaParaPosicionar(null);
         colocarMelhoria(jogador, melhoria, coluna);
         return true;
@@ -866,13 +928,13 @@ class Jogo {
         jogador.usarBonus(bonus);
         switch (bonus) {
             case DUAS_ESPADAS:
-                jogador.adicionarTributos(TipoTributo.ESPADA, 2);
+                darDaReserva(jogador, TipoTributo.ESPADA, 2);
                 break;
             case DUAS_MOEDAS:
-                jogador.adicionarTributos(TipoTributo.MOEDA, 2);
+                darDaReserva(jogador, TipoTributo.MOEDA, 2);
                 break;
             case DOIS_YURTS:
-                jogador.adicionarTributos(TipoTributo.YURT, 2);
+                darDaReserva(jogador, TipoTributo.YURT, 2);
                 break;
             case MOVIMENTOS:
                 movimentosRestantes += 3;
@@ -918,8 +980,19 @@ class Jogo {
         }
     }
 
+    // cada um fica com 1 das 2 cartas antes da 1ª rodada; depois não dá mais pra escolher
     boolean escolherCartaSecreta(Jogador jogador, CartaSecreta carta) {
-        return jogador.escolherCartaSecreta(carta);
+        return !partidaComecou && jogador.escolherCartaSecreta(carta);
+    }
+
+    // ninguém joga enquanto algum jogador que recebeu cartas não escolheu a sua
+    private boolean cartasSecretasEscolhidas() {
+        for (Jogador jogador : jogadores) {
+            if (!jogador.getCartasOferecidas().isEmpty() && jogador.getCartaSecreta() == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     //  votos e fim de jogo

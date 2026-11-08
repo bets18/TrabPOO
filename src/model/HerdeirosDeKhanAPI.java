@@ -520,6 +520,23 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
     }
 
     // Jochi: coloca a melhoria que está esperando na coluna escolhida
+    // Jochi no começo do jogo: a melhoria esperando pode ir pra coluna branca
+    public boolean isEscolhaInicialDoJochi() {
+        return jogo.getJogadorDaVez().getOutraMelhoriaInicial() != null;
+    }
+
+    // peças de tributo que ainda estão na reserva ao lado do tabuleiro
+    public int getTributosNaReserva(String tipoTributo) {
+        TipoTributo tipo = converter(TipoTributo.class, tipoTributo);
+        return tipo == null ? 0 : jogo.getNaReserva(tipo);
+    }
+
+    // a cidade conquistada tem o yurt do conquistador no meio? (não tem se o estoque dele acabou)
+    public boolean temYurtNaCidade(String nomeDaCidade) {
+        Cidade cidade = buscar(Cidade.class, nomeDaCidade);
+        return cidade != null && cidade.temYurtDoConquistador();
+    }
+
     public boolean posicionarMelhoria(String coluna) {
         Coluna c = converter(Coluna.class, coluna);
         return avisarSe(c != null && jogo.posicionarMelhoria(c), EVENTO_MELHORIA_POSICIONADA);

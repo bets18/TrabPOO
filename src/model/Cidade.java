@@ -43,6 +43,17 @@ class Cidade extends Local {
         conquistador = jogador;
     }
 
+    // quem conquista coloca um yurt seu no meio da cidade; sem yurts no estoque, conquista sem
+    private boolean yurtDoConquistador = false;
+
+    void colocarYurtDoConquistador() {
+        yurtDoConquistador = true;
+    }
+
+    boolean temYurtDoConquistador() {
+        return yurtDoConquistador;
+    }
+
     boolean podeSerAtacada() {
         return revelada && !estaConquistada() && quantidadeTesouros > 0;
     }

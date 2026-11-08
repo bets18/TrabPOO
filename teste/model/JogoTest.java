@@ -260,6 +260,48 @@ public class JogoTest {
         assertEquals("Kiev deveria ter recebido 4 tesouros.", 4, kiev.getQuantidadeTesouros());
     }
 
+    @Test(timeout = 2000)
+    public void testaSeConquistaSemYurtNoEstoqueNaoPoeYurtNaCidade() {
+        Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        Jogador altani = jogo.getJogadorDaVez();
+        while (altani.retirarYurtDoEstoque()) {
+            // esvazia o estoque de yurts
+        }
+        altani.adicionarTributos(TipoTributo.ESPADA, 7);
+        jogo.moverPeao(Arrays.asList(p1, p2), 2);
+
+        for (TipoTesouro tesouro : Arrays.asList(TipoTesouro.PELE, TipoTesouro.FERRO, TipoTesouro.CARNE, TipoTesouro.GRAOS)) {
+            jogo.atacarCidade(samarcanda, tesouro);
+        }
+
+        assertSame("Conquista mesmo sem yurt", altani, samarcanda.getConquistador());
+        assertFalse("Sem yurt no estoque, a cidade fica sem o yurt dele", samarcanda.temYurtDoConquistador());
+        assertEquals("Cidade sem yurt não conta na região", 0, new Pontuacao(jogo, altani).getYurtsNaRegiao(Regiao.PERSIA));
+    }
+
+    //  reserva de tributos
+
+    @Test(timeout = 2000)
+    public void testaSeTributosSaemDaReservaEPecasGastasVoltamPraEla() {
+        Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        assertEquals("10 espadas menos a da ProvEspada", 9, jogo.getNaReserva(TipoTributo.ESPADA));
+        assertEquals("15 moedas menos as 2 dos jogadores e as 2 das províncias", 11, jogo.getNaReserva(TipoTributo.MOEDA));
+
+        jogo.ativarColuna(Coluna.VERMELHA); // Altani: khan
+        assertTrue(jogo.moverKhan(provEspada));
+        assertEquals("O Khan pôs 1 espada na ProvEspada", 8, jogo.getNaReserva(TipoTributo.ESPADA));
+    }
+
+    @Test(timeout = 2000)
+    public void testaSeEspadaGastaNoAtaqueVoltaPraReserva() {
+        Jogo jogo = criarJogo(Herdeiro.ALTANI, Herdeiro.CHAGATAI);
+        jogo.getJogadorDaVez().adicionarTributos(TipoTributo.ESPADA, 1);
+        jogo.moverPeao(Arrays.asList(p1, p2), 2);
+
+        assertTrue(jogo.atacarCidade(samarcanda, TipoTesouro.PELE));
+        assertEquals(10, jogo.getNaReserva(TipoTributo.ESPADA));
+    }
+
     //  khan
 
     @Test(timeout = 2000)

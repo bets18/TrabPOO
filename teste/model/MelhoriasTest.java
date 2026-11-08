@@ -128,19 +128,38 @@ public class MelhoriasTest {
     }
 
     @Test(timeout = 2000)
-    public void testaSeJochiComecaComMelhoriaNaBrancaEEscolheAColunaDasOutras() {
-        Melhoria branca = m(TipoMelhoria.CAVALOS, Coluna.VERDE);
-        Melhoria escolhida = m(TipoMelhoria.ESPADA, Coluna.VERMELHA);
+    public void testaSeJochiEscolheQualDasDuasMelhoriasIniciaisVaiParaABranca() {
+        Melhoria primeira = m(TipoMelhoria.CAVALOS, Coluna.VERDE);
+        Melhoria segunda = m(TipoMelhoria.ESPADA, Coluna.VERMELHA);
         List<Melhoria> melhorias = pilha(m(TipoMelhoria.PUNHO, Coluna.AMARELA), m(TipoMelhoria.PUNHO, Coluna.AMARELA),
                 m(TipoMelhoria.PUNHO, Coluna.AMARELA), m(TipoMelhoria.PUNHO, Coluna.AMARELA),
-                m(TipoMelhoria.PUNHO, Coluna.AMARELA), branca, escolhida);
+                m(TipoMelhoria.PUNHO, Coluna.AMARELA), primeira, segunda);
         Jogo jogo = criarJogo(melhorias, Herdeiro.JOCHI, Herdeiro.OGEDEI);
         Jogador jochi = jogo.getJogadorDaVez();
 
-        assertEquals(Arrays.asList(branca), jochi.getMelhorias(Coluna.BRANCA));
-        assertSame(escolhida, jochi.getMelhoriaParaPosicionar());
-        assertFalse("Não vai pra branca", jogo.posicionarMelhoria(Coluna.BRANCA));
+        assertTrue("As 2 esperam a escolha", jochi.getMelhorias(Coluna.BRANCA).isEmpty());
+        assertSame(primeira, jochi.getMelhoriaParaPosicionar());
+        assertTrue("Pôs a 1ª numa colorida: a 2ª vai pra branca", jogo.posicionarMelhoria(Coluna.AMARELA));
+        assertEquals(Arrays.asList(primeira), jochi.getMelhorias(Coluna.AMARELA));
+        assertEquals(Arrays.asList(segunda), jochi.getMelhorias(Coluna.BRANCA));
+        assertNull(jochi.getMelhoriaParaPosicionar());
+    }
+
+    @Test(timeout = 2000)
+    public void testaSeJochiPodeMandarAPrimeiraMelhoriaInicialParaABranca() {
+        Melhoria primeira = m(TipoMelhoria.CAVALOS, Coluna.VERDE);
+        Melhoria segunda = m(TipoMelhoria.ESPADA, Coluna.VERMELHA);
+        List<Melhoria> melhorias = pilha(m(TipoMelhoria.PUNHO, Coluna.AMARELA), m(TipoMelhoria.PUNHO, Coluna.AMARELA),
+                m(TipoMelhoria.PUNHO, Coluna.AMARELA), m(TipoMelhoria.PUNHO, Coluna.AMARELA),
+                m(TipoMelhoria.PUNHO, Coluna.AMARELA), primeira, segunda);
+        Jogo jogo = criarJogo(melhorias, Herdeiro.JOCHI, Herdeiro.OGEDEI);
+        Jogador jochi = jogo.getJogadorDaVez();
+
+        assertTrue(jogo.posicionarMelhoria(Coluna.BRANCA));
+        assertEquals(Arrays.asList(primeira), jochi.getMelhorias(Coluna.BRANCA));
+        assertSame("Agora escolhe a coluna da 2ª", segunda, jochi.getMelhoriaParaPosicionar());
+        assertFalse("A branca já foi usada", jogo.posicionarMelhoria(Coluna.BRANCA));
         assertTrue("Vermelha de fundo, mas o Jochi põe onde quiser", jogo.posicionarMelhoria(Coluna.AMARELA));
-        assertEquals(Arrays.asList(escolhida), jochi.getMelhorias(Coluna.AMARELA));
+        assertEquals(Arrays.asList(segunda), jochi.getMelhorias(Coluna.AMARELA));
     }
 }

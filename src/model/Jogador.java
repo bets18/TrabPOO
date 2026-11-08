@@ -25,6 +25,8 @@ class Jogador {
     private final Map<Coluna, List<Melhoria>> melhorias = new HashMap<>();
     // só o Jochi escolhe a coluna da melhoria; enquanto não escolhe ela fica aqui
     private Melhoria melhoriaParaPosicionar = null;
+    // Jochi: a outra das 2 melhorias iniciais, enquanto ele não decide qual vai pra coluna branca
+    private Melhoria outraMelhoriaInicial = null;
 
     private final Set<TipoBonus> bonusGuardados = new HashSet<>(); // cada bônus só existe uma vez no jogo
     private int bonusObtidos = 0;
@@ -185,6 +187,14 @@ class Jogador {
             todas.addAll(melhorias.get(coluna));
         }
         return todas;
+    }
+
+    Melhoria getOutraMelhoriaInicial() {
+        return outraMelhoriaInicial;
+    }
+
+    void setOutraMelhoriaInicial(Melhoria melhoria) {
+        outraMelhoriaInicial = melhoria;
     }
 
     Melhoria getMelhoriaParaPosicionar() {

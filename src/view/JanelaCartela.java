@@ -108,7 +108,9 @@ class JanelaCartela extends JDialog implements ObservadorIF {
     private void atualizarAviso() {
         String nome = EstiloJogador.getNome(modelo.getHerdeiroDoJogadorDaVez());
         setTitle("Cartela de " + nome);
-        if (modelo.getMelhoriaParaPosicionar() != null) {
+        if (modelo.isEscolhaInicialDoJochi()) {
+            aviso.setText("Jochi: clique na coluna branca para pôr esta melhoria lá, ou numa colorida (a outra vai para a branca)");
+        } else if (modelo.getMelhoriaParaPosicionar() != null) {
             aviso.setText("Clique na coluna colorida onde vai a melhoria nova (as livres estão destacadas)");
         } else if (modelo.getColunaDoTurno() == null) {
             aviso.setText("Clique numa coluna sem ficha (a branca devolve todas as fichas)");
@@ -169,7 +171,8 @@ class JanelaCartela extends JDialog implements ObservadorIF {
                 }
                 Rectangle retangulo = areaDaColuna(area, i);
                 boolean ativada = coluna.equals(modelo.getColunaDoTurno());
-                boolean livreParaMelhoria = posicionando && i < 3 && melhorias.size() < TOPO_DOS_ESPACOS.length;
+                boolean livreParaMelhoria = posicionando && (i < 3 || modelo.isEscolhaInicialDoJochi())
+                        && melhorias.size() < TOPO_DOS_ESPACOS.length;
                 if (ativada || livreParaMelhoria) {
                     g2.setColor(livreParaMelhoria ? new Color(255, 215, 0) : Color.WHITE);
                     g2.setStroke(new BasicStroke(4f));

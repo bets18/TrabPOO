@@ -32,7 +32,17 @@ public class FimDeJogoTest {
         return (Parada) t.getLocal(nome);
     }
 
+    // antes da 1ª rodada cada um fica com a 1ª carta que recebeu, se ainda não escolheu
+    private void escolherCartasQueFaltam() {
+        for (Jogador jogador : Arrays.asList(altani, ogedei)) {
+            if (jogador.getCartaSecreta() == null) {
+                jogo.escolherCartaSecreta(jogador, jogador.getCartasOferecidas().get(0));
+            }
+        }
+    }
+
     private void jogarTurnoVazio() {
+        escolherCartasQueFaltam();
         jogo.ativarColuna(Coluna.BRANCA);
         if (jogo.isKhanPendente()) {
             // alterna o khan entre a área de melhorias e uma província

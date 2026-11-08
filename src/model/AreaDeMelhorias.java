@@ -65,6 +65,19 @@ class AreaDeMelhorias {
         }
     }
 
+    // ainda dá pra pegar alguma melhoria (na área ou na pilha)?
+    boolean temMelhoria() {
+        if (!pilha.isEmpty()) {
+            return true;
+        }
+        for (Melhoria melhoria : espacos) {
+            if (melhoria != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void empurrarParaDireita() {
         List<Melhoria> restantes = new ArrayList<>();
         for (Melhoria melhoria : espacos) {

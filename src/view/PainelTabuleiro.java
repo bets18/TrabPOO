@@ -149,8 +149,14 @@ class PainelTabuleiro extends JPanel implements ObservadorIF {
                 g2.setColor(Color.WHITE);
                 g2.setFont(new Font("SansSerif", Font.BOLD, 22));
                 centralizar(g2, "?", x, y);
-            } else if (conquistador != null) {
+            } else if (conquistador != null && modelo.temYurtNaCidade(cidade)) {
                 desenharYurt(g2, EstiloJogador.getCor(conquistador), x, y, 2.0);
+            } else if (conquistador != null) {
+                // conquistou sem yurt no estoque: só um anel na cor dele
+                double r = 90 * s;
+                g2.setColor(EstiloJogador.getCor(conquistador));
+                g2.setStroke(new BasicStroke(5f));
+                g2.draw(new Ellipse2D.Double(x - r, y - r, 2 * r, 2 * r));
             } else {
                 desenharTesourosDaCidade(g2, cidade, x, y + 115 * s);
             }

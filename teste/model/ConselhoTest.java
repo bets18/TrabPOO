@@ -34,7 +34,38 @@ public class ConselhoTest {
     private Jogo criarJogo(List<CartaAberta> abertas, List<TipoBonus> bonus, Herdeiro... herdeiros) {
         Jogo jogo = new Jogo(t, Arrays.asList(herdeiros));
         jogo.prepararConselho(abertas, new ArrayList<>(Arrays.asList(CartaSecreta.values())), bonus);
+        // a carta secreta tem que ser escolhida antes da 1ª rodada
+        for (int i = 0; i < herdeiros.length; i++) {
+            Jogador jogador = jogo.getJogador(i);
+            jogo.escolherCartaSecreta(jogador, jogador.getCartasOferecidas().get(0));
+        }
         return jogo;
+    }
+
+    @Test(timeout = 2000)
+    public void testaSeNinguemJogaAntesDeTodosEscolheremACartaSecreta() {
+        Jogo jogo = new Jogo(t, Arrays.asList(Herdeiro.ALTANI, Herdeiro.OGEDEI));
+        jogo.prepararConselho(new ArrayList<CartaAberta>(), new ArrayList<>(Arrays.asList(CartaSecreta.values())),
+                bonusEmKarakorum(TipoBonus.VOTO));
+        Jogador altani = jogo.getJogador(0);
+        Jogador ogedei = jogo.getJogador(1);
+
+        assertFalse("Ninguém escolheu ainda", jogo.ativarColuna(Coluna.BRANCA));
+        assertTrue(jogo.escolherCartaSecreta(altani, altani.getCartasOferecidas().get(1)));
+        assertFalse("O Ogedei ainda não escolheu", jogo.ativarColuna(Coluna.BRANCA));
+        assertTrue(jogo.escolherCartaSecreta(ogedei, ogedei.getCartasOferecidas().get(0)));
+        assertTrue(jogo.ativarColuna(Coluna.BRANCA));
+        assertFalse("Depois da 1ª ativação não troca mais", jogo.escolherCartaSecreta(altani, altani.getCartasOferecidas().get(0)));
+    }
+
+    @Test(timeout = 2000)
+    public void testaSeYurtInicialDoToluiEmKarakorumNaoContaNaRede() {
+        Jogo jogo = criarJogo(new ArrayList<CartaAberta>(), bonusEmKarakorum(TipoBonus.VOTO), Herdeiro.TOLUI, Herdeiro.ALTANI);
+        Jogador tolui = jogo.getJogadorDaVez();
+        tolui.adicionarTributos(TipoTributo.YURT, 1);
+        assertTrue(jogo.construirYurt(parada("C4")));
+
+        assertEquals("Só o yurt de C4 conta, o de Karakorum não", 1, new Pontuacao(jogo, tolui).getMaiorRedeDeYurts());
     }
 
     private static List<TipoBonus> bonusEmKarakorum(TipoBonus bonus) {

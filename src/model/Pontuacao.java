@@ -75,7 +75,7 @@ class Pontuacao {
             }
         }
         for (Cidade cidade : tabuleiro.getLocais(Cidade.class)) {
-            if (cidade.getRegiao() == regiao && cidade.getConquistador() == jogador) {
+            if (cidade.getRegiao() == regiao && cidade.getConquistador() == jogador && cidade.temYurtDoConquistador()) {
                 total++;
             }
         }
@@ -95,7 +95,7 @@ class Pontuacao {
         Set<Parada> visitadas = new HashSet<>();
         int maior = 0;
         for (Parada inicio : tabuleiro.getLocais(Parada.class)) {
-            if (visitadas.contains(inicio) || !inicio.possuiYurtDe(jogador)) {
+            if (visitadas.contains(inicio) || !temYurtQueConta(inicio)) {
                 continue;
             }
             int yurtsDaRede = 0;
@@ -106,7 +106,7 @@ class Pontuacao {
                 Parada atual = fila.remove(0);
                 yurtsDaRede += atual.getQuantidadeYurtsDe(jogador);
                 for (Parada vizinha : tabuleiro.getParadasVizinhas(atual)) {
-                    if (!visitadas.contains(vizinha) && vizinha.possuiYurtDe(jogador)) {
+                    if (!visitadas.contains(vizinha) && temYurtQueConta(vizinha)) {
                         visitadas.add(vizinha);
                         fila.add(vizinha);
                     }
@@ -142,9 +142,17 @@ class Pontuacao {
     private int getYurtsAdjacentes(Local local) {
         int total = 0;
         for (Parada parada : tabuleiro.getParadasAdjacentes(local)) {
-            total += parada.getQuantidadeYurtsDe(jogador);
+            if (parada.getTipo() != TipoParada.KARAKORUM) {
+                total += parada.getQuantidadeYurtsDe(jogador);
+            }
         }
         return total;
+    }
+
+    // o yurt do Tolui em Karakorum só ajuda no movimento e nas cartas abertas de yurts no
+    // mapa (pág. 20); não entra nas redes nem nas adjacências das cartas secretas
+    private boolean temYurtQueConta(Parada parada) {
+        return parada.getTipo() != TipoParada.KARAKORUM && parada.possuiYurtDe(jogador);
     }
 
     // paradas duplas (pontos de entrega fora Karakorum) com pelo menos 1 yurt dele
