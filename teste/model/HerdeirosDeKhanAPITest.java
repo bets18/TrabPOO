@@ -34,13 +34,13 @@ public class HerdeirosDeKhanAPITest {
         assertSame("Singleton: getInstancia sempre devolve o mesmo objeto", api, HerdeirosDeKhanAPI.getInstancia());
     }
 
-    // observador de teste que só guarda os eventos recebidos
+    // observador de teste que só guarda os eventos recebidos (pegos pelo get, como no Cap. 17)
     private static class Espiao implements ObservadorIF {
-        private final java.util.List<String> eventos = new java.util.ArrayList<>();
+        private final java.util.List<Integer> eventos = new java.util.ArrayList<>();
 
         @Override
-        public void notificar(ObservadoIF observado, String evento) {
-            eventos.add(evento);
+        public void notificar(ObservadoIF observado) {
+            eventos.add(observado.get(HerdeirosDeKhanAPI.ULTIMO_EVENTO));
         }
     }
 

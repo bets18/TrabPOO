@@ -98,7 +98,7 @@ class PainelJogador extends JPanel implements ObservadorIF {
     }
 
     @Override
-    public void notificar(ObservadoIF observado, String evento) {
+    public void notificar(ObservadoIF observado) {
         atualizar();
     }
 

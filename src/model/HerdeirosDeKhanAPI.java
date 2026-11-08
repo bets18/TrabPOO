@@ -8,29 +8,32 @@ import java.util.List;
 // Façade do model: a View e o Controller só falam com esta classe, e só passam String e int,
 // nunca as classes de dentro do pacote. É um Singleton (uma partida por vez, pegue com
 // getInstancia()) e é o observado do padrão Observer: toda jogada que muda o estado da
-// partida avisa os observadores com um dos eventos abaixo
+// partida avisa os observadores, que perguntam com get(ULTIMO_EVENTO) qual dos eventos abaixo foi
 public class HerdeirosDeKhanAPI implements ObservadoIF {
-    public static final String EVENTO_PARTIDA_INICIADA = "PARTIDA_INICIADA";
-    public static final String EVENTO_CARTA_SECRETA_ESCOLHIDA = "CARTA_SECRETA_ESCOLHIDA";
-    public static final String EVENTO_TURNO_INICIADO = "TURNO_INICIADO";
-    public static final String EVENTO_COLUNA_ATIVADA = "COLUNA_ATIVADA";
-    public static final String EVENTO_PEAO_MOVIDO = "PEAO_MOVIDO";
-    public static final String EVENTO_PEAO_SELECIONADO = "PEAO_SELECIONADO";
-    public static final String EVENTO_TRIBUTO_PEGO = "TRIBUTO_PEGO";
-    public static final String EVENTO_KHAN_MOVIDO = "KHAN_MOVIDO";
-    public static final String EVENTO_CIDADE_SELECIONADA = "CIDADE_SELECIONADA";
-    public static final String EVENTO_TESOURO_TOMADO = "TESOURO_TOMADO";
-    public static final String EVENTO_YURT_CONSTRUIDO = "YURT_CONSTRUIDO";
-    public static final String EVENTO_MELHORIA_COMPRADA = "MELHORIA_COMPRADA";
-    public static final String EVENTO_MELHORIA_POSICIONADA = "MELHORIA_POSICIONADA";
-    public static final String EVENTO_CONSELHEIRO_SELECIONADO = "CONSELHEIRO_SELECIONADO";
-    public static final String EVENTO_TESOUROS_ENTREGUES = "TESOUROS_ENTREGUES";
-    public static final String EVENTO_BONUS_USADO = "BONUS_USADO";
-    public static final String EVENTO_TRIBUTO_GANHO = "TRIBUTO_GANHO";
-    public static final String EVENTO_SELECAO_CANCELADA = "SELECAO_CANCELADA";
-    public static final String EVENTO_JANELA_DA_CARTELA = "JANELA_DA_CARTELA";
-    public static final String EVENTO_JANELA_DE_CARTAS = "JANELA_DE_CARTAS";
-    public static final String EVENTO_JOGO_TERMINADO = "JOGO_TERMINADO";
+    // índice do get() do Observer
+    public static final int ULTIMO_EVENTO = 0;
+
+    public static final int EVENTO_PARTIDA_INICIADA = 1;
+    public static final int EVENTO_CARTA_SECRETA_ESCOLHIDA = 2;
+    public static final int EVENTO_TURNO_INICIADO = 3;
+    public static final int EVENTO_COLUNA_ATIVADA = 4;
+    public static final int EVENTO_PEAO_MOVIDO = 5;
+    public static final int EVENTO_PEAO_SELECIONADO = 6;
+    public static final int EVENTO_TRIBUTO_PEGO = 7;
+    public static final int EVENTO_KHAN_MOVIDO = 8;
+    public static final int EVENTO_CIDADE_SELECIONADA = 9;
+    public static final int EVENTO_TESOURO_TOMADO = 10;
+    public static final int EVENTO_YURT_CONSTRUIDO = 11;
+    public static final int EVENTO_MELHORIA_COMPRADA = 12;
+    public static final int EVENTO_MELHORIA_POSICIONADA = 13;
+    public static final int EVENTO_CONSELHEIRO_SELECIONADO = 14;
+    public static final int EVENTO_TESOUROS_ENTREGUES = 15;
+    public static final int EVENTO_BONUS_USADO = 16;
+    public static final int EVENTO_TRIBUTO_GANHO = 17;
+    public static final int EVENTO_SELECAO_CANCELADA = 18;
+    public static final int EVENTO_JANELA_DA_CARTELA = 19;
+    public static final int EVENTO_JANELA_DE_CARTAS = 20;
+    public static final int EVENTO_JOGO_TERMINADO = 21;
 
     // onde o khan pode estar além das províncias do Khan
     public static final String AREA_DE_MELHORIAS = "AREA_DE_MELHORIAS";
@@ -44,6 +47,7 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
 
     private Jogo jogo = null;
     private final List<ObservadorIF> observadores = new ArrayList<>();
+    private int ultimoEvento = 0;
 
     private HerdeirosDeKhanAPI() {
     }
@@ -145,15 +149,25 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
         observadores.remove(observador);
     }
 
+    // os observadores pegam o evento por aqui (callback do Cap. 17)
+    @Override
+    public int get(int i) {
+        if (i == ULTIMO_EVENTO) {
+            return ultimoEvento;
+        }
+        return -1;
+    }
+
     // copia a lista porque um observador pode se remover enquanto é avisado
-    private void notificar(String evento) {
+    private void notificar(int evento) {
+        ultimoEvento = evento;
         for (ObservadorIF observador : new ArrayList<>(observadores)) {
-            observador.notificar(this, evento);
+            observador.notificar(this);
         }
     }
 
     // avisa só se a jogada deu certo
-    private boolean avisarSe(boolean feito, String evento) {
+    private boolean avisarSe(boolean feito, int evento) {
         if (feito) {
             notificar(evento);
         }

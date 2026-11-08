@@ -88,17 +88,18 @@ class JanelaCartela extends JDialog implements ObservadorIF {
     }
 
     @Override
-    public void notificar(ObservadoIF observado, String evento) {
+    public void notificar(ObservadoIF observado) {
+        int evento = observado.get(HerdeirosDeKhanAPI.ULTIMO_EVENTO);
         atualizarAviso();
-        if (evento.equals(HerdeirosDeKhanAPI.EVENTO_JOGO_TERMINADO)) {
+        if (evento == HerdeirosDeKhanAPI.EVENTO_JOGO_TERMINADO) {
             setVisible(false);
-        } else if (evento.equals(HerdeirosDeKhanAPI.EVENTO_TURNO_INICIADO)
-                || evento.equals(HerdeirosDeKhanAPI.EVENTO_JANELA_DA_CARTELA)
-                || evento.equals(HerdeirosDeKhanAPI.EVENTO_MELHORIA_COMPRADA)
-                || evento.equals(HerdeirosDeKhanAPI.EVENTO_MELHORIA_POSICIONADA)) {
+        } else if (evento == HerdeirosDeKhanAPI.EVENTO_TURNO_INICIADO
+                || evento == HerdeirosDeKhanAPI.EVENTO_JANELA_DA_CARTELA
+                || evento == HerdeirosDeKhanAPI.EVENTO_MELHORIA_COMPRADA
+                || evento == HerdeirosDeKhanAPI.EVENTO_MELHORIA_POSICIONADA) {
             setVisible(true);
             toFront();
-        } else if (evento.equals(HerdeirosDeKhanAPI.EVENTO_COLUNA_ATIVADA) && modelo.getMelhoriaParaPosicionar() == null) {
+        } else if (evento == HerdeirosDeKhanAPI.EVENTO_COLUNA_ATIVADA && modelo.getMelhoriaParaPosicionar() == null) {
             // a coluna já foi escolhida: libera a vista do mapa
             setVisible(false);
         }

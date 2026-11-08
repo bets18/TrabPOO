@@ -50,7 +50,7 @@ class PainelTabuleiro extends JPanel implements ObservadorIF {
 
     // qualquer mudança no estado da partida aparece no tabuleiro
     @Override
-    public void notificar(ObservadoIF observado, String evento) {
+    public void notificar(ObservadoIF observado) {
         repaint();
     }
 

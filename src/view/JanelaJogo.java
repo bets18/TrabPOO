@@ -56,8 +56,9 @@ public class JanelaJogo extends JFrame implements ObservadorIF {
     }
 
     @Override
-    public void notificar(ObservadoIF observado, String evento) {
-        if (evento.equals(HerdeirosDeKhanAPI.EVENTO_JOGO_TERMINADO)) {
+    public void notificar(ObservadoIF observado) {
+        int evento = observado.get(HerdeirosDeKhanAPI.ULTIMO_EVENTO);
+        if (evento == HerdeirosDeKhanAPI.EVENTO_JOGO_TERMINADO) {
             new JanelaResultado(this).setVisible(true);
         }
     }

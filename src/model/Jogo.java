@@ -46,7 +46,7 @@ class Jogo {
     private boolean khanNaAreaDeMelhorias = false;
     private int votosNoConselho = 0;            // ficha neutra
 
-    // reserva de peças de tributo ao lado do tabuleiro: 10 espadas, 10 yurts e 15 moedas (pág. 2).
+    // reserva de peças de tributo ao lado do tabuleiro: 10 espadas, 10 yurts e 15 moedas.
     // Tudo que entra no jogo sai daqui e tudo que é gasto volta pra cá; acabou, acabou
     private final Map<TipoTributo, Integer> reserva = new HashMap<>();
     // a escolha das cartas secretas só vale antes da 1ª rodada

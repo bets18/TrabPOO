@@ -93,16 +93,17 @@ class JanelaCartas extends JDialog implements ObservadorIF {
     }
 
     @Override
-    public void notificar(ObservadoIF observado, String evento) {
+    public void notificar(ObservadoIF observado) {
+        int evento = observado.get(HerdeirosDeKhanAPI.ULTIMO_EVENTO);
         atualizar();
         // abre quando começa uma escolha (cidade, entrega de 3 quaisquer, tesouro do bônus)
         // ou quando pedem pra ver as cartas; nas outras mudanças só redesenha
-        boolean comecouEscolha = evento.equals(HerdeirosDeKhanAPI.EVENTO_CIDADE_SELECIONADA)
-                || evento.equals(HerdeirosDeKhanAPI.EVENTO_CONSELHEIRO_SELECIONADO)
-                || (evento.equals(HerdeirosDeKhanAPI.EVENTO_BONUS_USADO) && !modelo.getTesourosParaEscolher().isEmpty());
-        if (evento.equals(HerdeirosDeKhanAPI.EVENTO_JOGO_TERMINADO)) {
+        boolean comecouEscolha = evento == HerdeirosDeKhanAPI.EVENTO_CIDADE_SELECIONADA
+                || evento == HerdeirosDeKhanAPI.EVENTO_CONSELHEIRO_SELECIONADO
+                || (evento == HerdeirosDeKhanAPI.EVENTO_BONUS_USADO && !modelo.getTesourosParaEscolher().isEmpty());
+        if (evento == HerdeirosDeKhanAPI.EVENTO_JOGO_TERMINADO) {
             setVisible(false);
-        } else if (evento.equals(HerdeirosDeKhanAPI.EVENTO_JANELA_DE_CARTAS) || comecouEscolha) {
+        } else if (evento == HerdeirosDeKhanAPI.EVENTO_JANELA_DE_CARTAS || comecouEscolha) {
             setVisible(true);
             toFront();
         }

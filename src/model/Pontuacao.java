@@ -150,7 +150,7 @@ class Pontuacao {
     }
 
     // o yurt do Tolui em Karakorum só ajuda no movimento e nas cartas abertas de yurts no
-    // mapa (pág. 20); não entra nas redes nem nas adjacências das cartas secretas
+    // mapa; não entra nas redes nem nas adjacências das cartas secretas
     private boolean temYurtQueConta(Parada parada) {
         return parada.getTipo() != TipoParada.KARAKORUM && parada.possuiYurtDe(jogador);
     }

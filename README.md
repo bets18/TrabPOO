@@ -36,24 +36,24 @@ Todas as regras do manual podem ser acionadas pela interface gráfica.
 Padrões:
 * **Singleton**: `HerdeirosDeKhanAPI.getInstancia()` (uma partida por vez, criada com `novaPartida`).
 * **Façade**: a `HerdeirosDeKhanAPI` continua sendo a única porta do Model. Ela esconde `Jogo`, `Tabuleiro`, `Jogador` etc. e só recebe e devolve `String`, `int` e `boolean`.
-* **Observer**: interfaces `model.ObservadoIF` (adicionar/remover observador) e `model.ObservadorIF` (`notificar(observado, evento)`). A `HerdeirosDeKhanAPI` é a observada: cada jogada que dá certo avisa os observadores com um evento (`EVENTO_PEAO_MOVIDO`, `EVENTO_COLUNA_ATIVADA`, `EVENTO_JANELA_DA_CARTELA`, `EVENTO_JANELA_DE_CARTAS`, `EVENTO_JOGO_TERMINADO`...). As observadoras são `PainelTabuleiro`, `PainelJogador`, `JanelaCartela`, `JanelaCartas` e `JanelaJogo`, e cada uma se atualiza sozinha. O Controller não redesenha nada.
+* **Observer** (no formato do Cap. 17): interfaces `model.ObservadoIF` (adicionar/remover observador e `get(int)`) e `model.ObservadorIF` (`notificar(observado)`). A `HerdeirosDeKhanAPI` é a observada: cada jogada que dá certo avisa os observadores, e cada um pergunta o que mudou com `observado.get(HerdeirosDeKhanAPI.ULTIMO_EVENTO)`, que devolve um evento (`EVENTO_PEAO_MOVIDO`, `EVENTO_COLUNA_ATIVADA`, `EVENTO_JANELA_DA_CARTELA`, `EVENTO_JANELA_DE_CARTAS`, `EVENTO_JOGO_TERMINADO`...). As observadoras são `PainelTabuleiro`, `PainelJogador`, `JanelaCartela`, `JanelaCartas` e `JanelaJogo`, e cada uma se atualiza sozinha. O Controller não redesenha nada.
 * **Controller**: o `ControladorJogo` organiza a sequência da partida: janela inicial (escolha dos herdeiros), escolha da carta de conselheiro secreto de cada jogador e depois os turnos. Ele traduz cada clique na jogada certa para o momento (ex.: clicar numa coluna ativa a coluna ou, se o Jochi tem melhoria esperando, posiciona a melhoria).
 
-Janelas: todas as imagens de elementos do jogo (tabuleiro, peões, cartela, melhorias, fichas, bônus e cartas) são desenhadas com `drawImage()`; os componentes Swing só aparecem em botões e textos. A janela da cartela e a de peças e cartas abrem pelos botões do painel e fecham pelo botão "Fechar" delas.
+Janelas: todas as imagens de elementos do jogo (tabuleiro, cartela, melhorias, fichas, bônus e cartas) são desenhadas com `drawImage()`; peões, yurts e o Khan não têm imagem nos arquivos da disciplina, então são desenhados com formas do Java2D. Os componentes Swing só aparecem em botões e textos. A janela da cartela e a de peças e cartas abrem pelos botões do painel e fecham pelo botão "Fechar" delas.
 
 Regras novas no Model:
 * Mapa: 12 províncias de tributo e 4 do Khan (cada Khan com 3 setas) e 7 conselheiros (as 6 paradas duplas e Karakorum).
 * Colunas: os punhos limitam quantos tributos se pega; o Khan da coluna é obrigatório (não passa a vez sem movê-lo) e vai para uma província do Khan ou para a área de melhorias; a moeda virtual vale só no turno.
 * Melhorias: área com 5 peças e pilha; compra por 2 moedas (as virtuais primeiro), na coluna da cor da peça, sem valer no turno da compra; as restantes andam para a direita; completar uma linha dá uma melhoria grátis na coluna branca; o Khan na área de melhorias repõe as peças e dá moeda/espada se esses espaços estiverem vazios.
 * Conselheiros: entrega do conjunto pedido numa parada feita no turno (1 voto, 2 em Karakorum); a 1ª entrega leva a peça de bônus (voto, 2 espadas, 2 moedas, 2 yurts, 3 movimentos + 1 punho, 2 punhos, 3 tesouros para escolher 1).
+* Reserva de tributos: 10 espadas, 10 yurts e 15 moedas. O que é gasto volta para a reserva; se uma peça acabar, ninguém ganha aquela peça até alguém gastar uma.
 * Cartas: 4 de conselheiro aberto na mesa (1 voto para quem cumprir primeiro) e 2 secretas por jogador, que fica com 1.
-* Habilidades: Altani (só o peão ativo age), Chagatai (1 cavalo vira 1 espada), Jochi (começa com 1 melhoria na coluna branca e escolhe a coluna das melhorias), Ogedei (1 moeda por um tesouro de qualquer cidade, menos o último), Tolui (yurt em Karakorum e construção nas paradas vizinhas).
+* Habilidades: Altani (só o peão ativo age), Chagatai (1 cavalo vira 1 espada), Jochi (começa com 2 melhorias, 1 delas na coluna branca, e escolhe a coluna das melhorias), Ogedei (1 moeda por um tesouro de qualquer cidade, menos o último), Tolui (yurt em Karakorum e construção nas paradas vizinhas).
 * Fim de jogo: depois do disparo termina a rodada e joga-se mais uma completa. Contam a influência nas 3 regiões (tabela do tabuleiro: votos pelas melhorias da coluna da região para quem tem mais yurts e para o 2º) e a carta secreta. Desempate: tesouros não entregues e depois a distância até Karakorum.
 
 Decisões nossas onde o manual não diz:
 * A divisão das melhorias entre as 3 cores de fundo (as de tesouro seguem as imagens).
-* Das 2 melhorias iniciais do Jochi, a 1ª da pilha vai para a coluna branca e ele escolhe a coluna da outra no 1º turno.
-* As peças de tributo da reserva não têm limite.
+* Das 2 melhorias iniciais do Jochi, ele escolhe no 1º turno qual vai para a coluna branca e em que coluna colorida fica a outra.
 * A peça opcional de Karakorum não é usada.
 
 ## Como jogar
