@@ -12,6 +12,7 @@ class Jogador {
     static final int MELHORIAS_POR_COLUNA = 4;
 
     private final Herdeiro herdeiro;
+    private final String nome; // nome de quem está jogando com esse herdeiro
     private final Map<TipoTributo, Integer> tributos = new HashMap<>();
     private final Map<TipoTesouro, Integer> tesouros = new HashMap<>();
     private int yurtsNoEstoque = YURTS_INICIAIS;
@@ -35,8 +36,15 @@ class Jogador {
     private final List<CartaSecreta> cartasOferecidas = new ArrayList<>();
     private CartaSecreta cartaSecreta = null;
 
+    // sem nome próprio, o jogador é chamado pelo nome do herdeiro
     Jogador(Herdeiro herdeiro) {
+        this(herdeiro, null);
+    }
+
+    Jogador(Herdeiro herdeiro, String nome) {
         this.herdeiro = herdeiro;
+        boolean semNome = nome == null || nome.trim().isEmpty();
+        this.nome = semNome ? herdeiro.name().charAt(0) + herdeiro.name().substring(1).toLowerCase() : nome.trim();
         int peoes = herdeiro == Herdeiro.ALTANI ? 2 : 1;
         for (int i = 0; i < peoes; i++) {
             posicoes.add(null);
@@ -51,6 +59,10 @@ class Jogador {
 
     Herdeiro getHerdeiro() {
         return herdeiro;
+    }
+
+    String getNome() {
+        return nome;
     }
 
     //  tributos
@@ -74,6 +86,14 @@ class Jogador {
 
     int getQuantidadeTributo(TipoTributo tipo) {
         return tributos.get(tipo);
+    }
+
+    // só ao carregar uma partida salva
+    void definirTributos(TipoTributo tipo, int quantidade) {
+        if (quantidade < 0) {
+            throw new IllegalArgumentException("Quantidade de tributos não pode ser negativa.");
+        }
+        tributos.put(tipo, quantidade);
     }
 
     //  tesouros
@@ -108,6 +128,14 @@ class Jogador {
 
     int getYurtsNoEstoque() {
         return yurtsNoEstoque;
+    }
+
+    // só ao carregar uma partida salva
+    void definirYurtsNoEstoque(int quantidade) {
+        if (quantidade < 0 || quantidade > YURTS_INICIAIS) {
+            throw new IllegalArgumentException("Estoque de yurts inválido.");
+        }
+        yurtsNoEstoque = quantidade;
     }
 
     boolean retirarYurtDoEstoque() {
@@ -223,6 +251,10 @@ class Jogador {
     // false se ele não tem esse bônus guardado
     boolean usarBonus(TipoBonus bonus) {
         return bonusGuardados.remove(bonus);
+    }
+
+    List<Coluna> getColunasComFicha() {
+        return new ArrayList<>(colunasComFicha);
     }
 
     List<TipoBonus> getBonusGuardados() {

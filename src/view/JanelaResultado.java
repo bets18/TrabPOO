@@ -22,7 +22,7 @@ import model.HerdeirosDeKhanAPI;
 // placar final: votos ganhos na partida, influência nas regiões, carta secreta e o vencedor
 class JanelaResultado extends JDialog {
     private static final long serialVersionUID = 1L;
-    private static final String[] COLUNAS = {"Herdeiro", "Na partida", "Influência", "Carta secreta", "Total", "Tesouros"};
+    private static final String[] COLUNAS = {"Jogador", "Na partida", "Influência", "Carta secreta", "Total", "Tesouros"};
 
     JanelaResultado(Frame dona) {
         super(dona, "Fim de jogo", true);
@@ -30,11 +30,13 @@ class JanelaResultado extends JDialog {
 
         List<String> vencedores = modelo.getVencedores();
         StringBuilder nomes = new StringBuilder();
-        for (String herdeiro : vencedores) {
-            if (nomes.length() > 0) {
-                nomes.append(" e ");
+        for (int i = 0; i < modelo.getNumeroDeJogadores(); i++) {
+            if (vencedores.contains(modelo.getHerdeiro(i))) {
+                if (nomes.length() > 0) {
+                    nomes.append(" e ");
+                }
+                nomes.append(EstiloJogador.getRotulo(modelo.getNomeDoJogador(i), modelo.getHerdeiro(i)));
             }
-            nomes.append(EstiloJogador.getNome(herdeiro));
         }
         JLabel titulo = new JLabel((vencedores.size() > 1 ? "Novos Khans: " : "Novo Khan: ") + nomes, SwingConstants.CENTER);
         titulo.setFont(new Font("SansSerif", Font.BOLD, 24));
@@ -55,7 +57,8 @@ class JanelaResultado extends JDialog {
             int secreta = modelo.getVotosDaCartaSecreta(i);
             String carta = modelo.getCartaSecreta(i);
             String nomeDaCarta = carta == null ? "-" : Pecas.nomeDaCartaSecreta(carta);
-            tabela.add(celula(EstiloJogador.getNome(herdeiro), true, EstiloJogador.getCor(herdeiro)));
+            tabela.add(celula(EstiloJogador.getRotulo(modelo.getNomeDoJogador(i), herdeiro), true,
+                    EstiloJogador.getCor(herdeiro)));
             tabela.add(celula(String.valueOf(total - influencia - secreta), false, Color.BLACK));
             tabela.add(celula(String.valueOf(influencia), false, Color.BLACK));
             tabela.add(celula(nomeDaCarta + ": " + secreta, false, Color.BLACK));

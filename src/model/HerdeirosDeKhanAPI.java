@@ -1,5 +1,7 @@
 package model;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +36,8 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
     public static final int EVENTO_JANELA_DA_CARTELA = 19;
     public static final int EVENTO_JANELA_DE_CARTAS = 20;
     public static final int EVENTO_JOGO_TERMINADO = 21;
+    public static final int EVENTO_PARTIDA_SALVA = 22;
+    public static final int EVENTO_PARTIDA_CARREGADA = 23;
 
     // onde o khan pode estar além das províncias do Khan
     public static final String AREA_DE_MELHORIAS = "AREA_DE_MELHORIAS";
@@ -59,9 +63,15 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
         return instancia;
     }
 
-    // partida nova no mapa de verdade. Os nomes vêm na ordem de jogo, ex: "ALTANI", "JOCHI".
-    // Embaralha cidades, tesouros (8 de cada tipo), melhorias, cartas e bônus
+    // partida em que cada jogador é chamado pelo nome do herdeiro
     public void novaPartida(List<String> herdeirosNaOrdemDeJogo) {
+        novaPartida(herdeirosNaOrdemDeJogo, null);
+    }
+
+    // partida nova no mapa de verdade. Os herdeiros vêm na ordem de jogo, ex: "ALTANI", "JOCHI",
+    // e os nomes dos jogadores na mesma ordem (null = usa o nome do herdeiro).
+    // Embaralha cidades, tesouros (8 de cada tipo), melhorias, cartas e bônus
+    public void novaPartida(List<String> herdeirosNaOrdemDeJogo, List<String> nomesDosJogadores) {
         List<Herdeiro> herdeiros = new ArrayList<>();
         for (String nome : herdeirosNaOrdemDeJogo) {
             Herdeiro herdeiro = converter(Herdeiro.class, nome);
@@ -71,7 +81,7 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
             herdeiros.add(herdeiro);
         }
         Tabuleiro tabuleiro = MapaPadrao.criar();
-        Jogo novo = new Jogo(tabuleiro, herdeiros);
+        Jogo novo = new Jogo(tabuleiro, herdeiros, nomesDosJogadores);
 
         List<Cidade> cidades = tabuleiro.getLocais(Cidade.class);
         List<TipoTesouro> tesouros = new ArrayList<>();
@@ -135,6 +145,49 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
         }
     }
 
+    //  salvar e carregar
+
+    // só no começo da vez, antes de ativar a coluna e de fazer qualquer ação
+    public boolean podeSalvar() {
+        return jogo.podeSalvar();
+    }
+
+    // grava a partida num arquivo texto; false se agora não pode salvar ou se a gravação falhar
+    public boolean salvarPartida(String caminhoDoArquivo) {
+        if (caminhoDoArquivo == null || !jogo.podeSalvar()) {
+            return false;
+        }
+        try {
+            Salvamento.salvar(jogo, new File(caminhoDoArquivo));
+        } catch (IOException e) {
+            return false;
+        }
+        notificar(EVENTO_PARTIDA_SALVA);
+        return true;
+    }
+
+    // troca a partida atual pela do arquivo, que continua do começo da vez em que foi salva.
+    // Se o arquivo não existir ou não for uma partida válida, devolve false e nada muda
+    public boolean carregarPartida(String caminhoDoArquivo) {
+        if (caminhoDoArquivo == null) {
+            return false;
+        }
+        Jogo carregado;
+        try {
+            carregado = Salvamento.carregar(new File(caminhoDoArquivo));
+        } catch (IOException e) {
+            return false;
+        }
+        jogo = carregado;
+        notificar(EVENTO_PARTIDA_CARREGADA);
+        return true;
+    }
+
+    // false antes da 1ª partida ser criada ou carregada
+    public boolean temPartida() {
+        return jogo != null;
+    }
+
     //  Observer
 
     @Override
@@ -195,6 +248,15 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
 
     public String getHerdeiro(int indiceJogador) {
         return jogo.getJogador(indiceJogador).getHerdeiro().name();
+    }
+
+    // nome de quem joga com o herdeiro (o que foi digitado na janela inicial)
+    public String getNomeDoJogador(int indiceJogador) {
+        return jogo.getJogador(indiceJogador).getNome();
+    }
+
+    public String getNomeDoJogadorDaVez() {
+        return jogo.getJogadorDaVez().getNome();
     }
 
     public String getHerdeiroDoJogadorDaVez() {
@@ -533,7 +595,6 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
         return avisarSe(jogo.escolherMelhoriaGratis(espaco), EVENTO_MELHORIA_POSICIONADA);
     }
 
-    // Jochi: coloca a melhoria que está esperando na coluna escolhida
     // Jochi no começo do jogo: a melhoria esperando pode ir pra coluna branca
     public boolean isEscolhaInicialDoJochi() {
         return jogo.getJogadorDaVez().getOutraMelhoriaInicial() != null;
@@ -551,6 +612,7 @@ public class HerdeirosDeKhanAPI implements ObservadoIF {
         return cidade != null && cidade.temYurtDoConquistador();
     }
 
+    // Jochi: coloca a melhoria que está esperando na coluna escolhida
     public boolean posicionarMelhoria(String coluna) {
         Coluna c = converter(Coluna.class, coluna);
         return avisarSe(c != null && jogo.posicionarMelhoria(c), EVENTO_MELHORIA_POSICIONADA);

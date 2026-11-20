@@ -44,4 +44,11 @@ final class EstiloJogador {
     static String getNome(String herdeiro) {
         return herdeiro.charAt(0) + herdeiro.substring(1).toLowerCase();
     }
+
+    // jogador e herdeiro juntos: "Davi (Altani)". Se o jogador não deu nome, só o herdeiro
+    static String getRotulo(String nomeDoJogador, String herdeiro) {
+        String nomeDoHerdeiro = getNome(herdeiro);
+        return nomeDoJogador.equalsIgnoreCase(nomeDoHerdeiro) ? nomeDoHerdeiro
+                : nomeDoJogador + " (" + nomeDoHerdeiro + ")";
+    }
 }

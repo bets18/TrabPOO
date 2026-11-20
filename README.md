@@ -56,6 +56,13 @@ Decisões nossas onde o manual não diz:
 * Das 2 melhorias iniciais do Jochi, ele escolhe no 1º turno qual vai para a coluna branca e em que coluna colorida fica a outra.
 * A peça opcional de Karakorum não é usada.
 
+## 4ª iteração — nomes dos jogadores, salvar e carregar
+
+* **Janela inicial**: cada linha é um jogador, com o nome dele e o herdeiro (o peão e a cor) com que vai jogar. A ordem das linhas é a ordem de jogo (pelo manual, começa quem tiver o maior número de descendentes). O nome aparece no painel, nas janelas e no placar final.
+* **Salvar**: botão "Salvar partida" do painel da direita. Só dá para salvar no começo da vez, antes de ativar a coluna (`podeSalvar`), então o arquivo não precisa guardar o que só vale durante o turno. A partida vai para um arquivo texto escolhido com o `JFileChooser`, uma linha `chave=valor` por informação.
+* **Carregar**: "Continuar partida salva..." na janela inicial ou "Carregar partida" no painel. A partida volta no começo da vez em que foi salva. Arquivo inválido não muda nada e aparece um aviso na própria janela.
+* **Onde fica cada parte**: a View só escolhe o arquivo (`view.SeletorDeArquivo`); o Controller passa o caminho para a `HerdeirosDeKhanAPI` (`salvarPartida` / `carregarPartida`); quem grava e lê é a classe `model.Salvamento`. Depois de salvar ou carregar a API avisa os observadores (`EVENTO_PARTIDA_SALVA`, `EVENTO_PARTIDA_CARREGADA`) e as janelas se redesenham.
+
 ## Como jogar
 
 * **Cartela** (abre sozinha no começo do turno): clique numa coluna sem ficha. Os cavalos dela são os movimentos e os punhos são os tributos que se pode pegar.
@@ -67,12 +74,12 @@ Decisões nossas onde o manual não diz:
   * Atacar: clique numa cidade e escolha o tesouro na janela de peças e cartas.
   * Entregar tesouros: clique no pergaminho de um conselheiro. Os que têm contorno amarelo são aqueles em que você parou no turno.
   * Comprar melhoria: clique numa peça da área de melhorias.
-* **Painel da direita**: ver a cartela, ver peças e cartas, comprar do topo da pilha, a habilidade do Chagatai e "Passar a vez".
+* **Painel da direita**: ver a cartela, ver peças e cartas, comprar do topo da pilha, a habilidade do Chagatai, salvar ou carregar a partida e "Passar a vez".
 * **Janela de peças e cartas**: tributos, tesouros, bônus (clique para usar), votos e a carta secreta, além das escolhas de tesouro.
 
 ## Como executar
 
-No Eclipse, rode `controller.Principal` (Run As > Java Application) com o diretório de trabalho na pasta do projeto, para que a pasta `assets` seja encontrada. Sem argumentos, abre a janela para escolher os herdeiros na ordem de jogo; também dá para passar os nomes como argumentos (ex.: `ALTANI OGEDEI TOLUI`).
+No Eclipse, rode `controller.Principal` (Run As > Java Application) com o diretório de trabalho na pasta do projeto, para que a pasta `assets` seja encontrada. Sem argumentos, abre a janela inicial (nomes e herdeiros na ordem de jogo, ou uma partida salva); também dá para passar os nomes como argumentos (ex.: `ALTANI OGEDEI TOLUI`).
 
 ## Como rodar os testes
 

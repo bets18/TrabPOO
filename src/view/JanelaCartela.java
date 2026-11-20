@@ -94,6 +94,7 @@ class JanelaCartela extends JDialog implements ObservadorIF {
         if (evento == HerdeirosDeKhanAPI.EVENTO_JOGO_TERMINADO) {
             setVisible(false);
         } else if (evento == HerdeirosDeKhanAPI.EVENTO_TURNO_INICIADO
+                || evento == HerdeirosDeKhanAPI.EVENTO_PARTIDA_CARREGADA
                 || evento == HerdeirosDeKhanAPI.EVENTO_JANELA_DA_CARTELA
                 || evento == HerdeirosDeKhanAPI.EVENTO_MELHORIA_COMPRADA
                 || evento == HerdeirosDeKhanAPI.EVENTO_MELHORIA_POSICIONADA) {
@@ -107,7 +108,7 @@ class JanelaCartela extends JDialog implements ObservadorIF {
     }
 
     private void atualizarAviso() {
-        String nome = EstiloJogador.getNome(modelo.getHerdeiroDoJogadorDaVez());
+        String nome = EstiloJogador.getRotulo(modelo.getNomeDoJogadorDaVez(), modelo.getHerdeiroDoJogadorDaVez());
         setTitle("Cartela de " + nome);
         if (modelo.isEscolhaInicialDoJochi()) {
             aviso.setText("Jochi: clique na coluna branca para pôr esta melhoria lá, ou numa colorida (a outra vai para a branca)");

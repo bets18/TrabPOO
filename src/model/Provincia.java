@@ -28,6 +28,14 @@ class Provincia extends Local {
         return quantidade;
     }
 
+    // só ao carregar uma partida salva
+    void definirQuantidade(int quantidade) {
+        if (quantidade < 0 || quantidade > MAX_TRIBUTOS || (tipo == null && quantidade > 0)) {
+            throw new IllegalArgumentException("Quantidade de tributos inválida em " + getNome());
+        }
+        this.quantidade = quantidade;
+    }
+
     // false se já tem 3 ou se a província não dá tributo
     boolean adicionarTributo() {
         if (tipo == null || quantidade >= MAX_TRIBUTOS) {

@@ -12,6 +12,8 @@ class Cidade extends Local {
     private int quantidadeTesouros = 0;
     private boolean revelada = false;
     private Jogador conquistador = null;
+    // quem conquista coloca um yurt seu no meio da cidade; sem yurts no estoque, conquista sem
+    private boolean yurtDoConquistador = false;
 
     Cidade(String nome, Regiao regiao) {
         super(nome, regiao);
@@ -42,9 +44,6 @@ class Cidade extends Local {
     void conquistar(Jogador jogador) {
         conquistador = jogador;
     }
-
-    // quem conquista coloca um yurt seu no meio da cidade; sem yurts no estoque, conquista sem
-    private boolean yurtDoConquistador = false;
 
     void colocarYurtDoConquistador() {
         yurtDoConquistador = true;

@@ -110,7 +110,8 @@ class JanelaCartas extends JDialog implements ObservadorIF {
     }
 
     private void atualizar() {
-        setTitle("Peças e cartas de " + EstiloJogador.getNome(modelo.getHerdeiroDoJogadorDaVez()));
+        setTitle("Peças e cartas de " + EstiloJogador.getRotulo(modelo.getNomeDoJogadorDaVez(),
+                modelo.getHerdeiroDoJogadorDaVez()));
         cancelar.setVisible(modelo.getCidadeSelecionada() != null || modelo.getConselheiroSelecionado() != null);
         desenho.repaint();
     }
@@ -144,7 +145,8 @@ class JanelaCartas extends JDialog implements ObservadorIF {
 
             g2.setColor(EstiloJogador.getCor(herdeiro));
             g2.setFont(new Font("SansSerif", Font.BOLD, 20));
-            g2.drawString(EstiloJogador.getNome(herdeiro) + " - " + modelo.getVotos(jogador) + " votos", 12, 28);
+            g2.drawString(EstiloJogador.getRotulo(modelo.getNomeDoJogador(jogador), herdeiro) + " - "
+                    + modelo.getVotos(jogador) + " votos", 12, 28);
 
             // tributos (as virtuais só valem neste turno)
             titulo(g2, "Tributos", 56);

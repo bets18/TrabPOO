@@ -22,6 +22,17 @@ class AreaDeMelhorias {
         repor();
     }
 
+    // ao carregar uma partida salva: os espaços voltam como estavam (null = vazio), sem repor
+    AreaDeMelhorias(List<Melhoria> espacosSalvos, List<Melhoria> pilhaSalva) {
+        if (espacosSalvos.size() != ESPACOS) {
+            throw new IllegalArgumentException("A área de melhorias tem " + ESPACOS + " espaços.");
+        }
+        pilha = new ArrayList<>(pilhaSalva);
+        for (int i = 0; i < ESPACOS; i++) {
+            espacos[i] = espacosSalvos.get(i);
+        }
+    }
+
     // null se o espaço estiver vazio (ou se a pilha acabou, no caso do topo)
     Melhoria espiar(int espaco) {
         if (espaco == TOPO_DA_PILHA) {
@@ -54,6 +65,11 @@ class AreaDeMelhorias {
 
     int getTamanhoDaPilha() {
         return pilha.size();
+    }
+
+    // do topo pro fundo
+    List<Melhoria> getPilha() {
+        return new ArrayList<>(pilha);
     }
 
     // completa os espaços vazios com peças da pilha

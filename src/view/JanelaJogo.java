@@ -24,6 +24,8 @@ public class JanelaJogo extends JFrame implements ObservadorIF {
     private static final int LARGURA_MINIMA = 1000;
     private static final int ALTURA_MINIMA = 760;
 
+    private final PainelJogador painelJogador;
+
     public JanelaJogo(AcoesDoJogador acoes) {
         super("Herdeiros de Khan");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -42,7 +44,7 @@ public class JanelaJogo extends JFrame implements ObservadorIF {
         addComponentListener(new LimiteDeTamanho());
 
         PainelTabuleiro painelTabuleiro = new PainelTabuleiro(acoes);
-        PainelJogador painelJogador = new PainelJogador(acoes);
+        painelJogador = new PainelJogador(acoes);
         painelJogador.setPreferredSize(new Dimension(PainelJogador.LARGURA, ALTURA_MAXIMA));
 
         getContentPane().setLayout(new BorderLayout());
@@ -53,6 +55,12 @@ public class JanelaJogo extends JFrame implements ObservadorIF {
         new JanelaCartela(this, acoes);
         new JanelaCartas(this, acoes);
         HerdeirosDeKhanAPI.getInstancia().adicionarObservador(this);
+    }
+
+    // aviso curto no painel do jogador (ex: o arquivo não pôde ser carregado). Fica na
+    // própria janela, sem caixa de diálogo, e some na próxima mudança da partida
+    public void avisar(String texto) {
+        painelJogador.avisar(texto);
     }
 
     @Override

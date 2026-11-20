@@ -1,0 +1,28 @@
+INF1636 - Programação Orientada a Objetos - 2026.2
+Trabalho: Herdeiros de Khan
+
+GRUPO
+  Lis Almeida    - matrícula: 2421294
+  Rafaela Bessa  - matrícula: 2420043
+  Davi Rangel    - matrícula: 2411930
+
+CLASSE COM O MÉTODO MAIN
+  controller.Principal  (arquivo src/controller/Principal.java)
+
+VÍDEO DE APRESENTAÇÃO
+  (PREENCHER com o link do Google Drive ou Dropbox)
+
+COMO EXECUTAR
+  No Eclipse: botão direito em src/controller/Principal.java > Run As > Java Application.
+  O programa tem que rodar a partir da pasta do projeto (é o padrão do Eclipse), porque as
+  imagens são lidas da pasta "assets".
+
+COMO RODAR OS TESTES
+  Os testes são JUnit 4 e ficam na pasta "teste".
+  No Eclipse: botão direito na pasta teste > Run As > JUnit Test.
+
+SALVAR E CONTINUAR UMA PARTIDA
+  Salvar: botão "Salvar partida" do painel da direita. Só fica ligado no começo da vez de um
+  jogador, antes de ele ativar a coluna. A partida é gravada num arquivo texto (.txt).
+  Continuar: botão "Continuar partida salva..." da janela inicial ou "Carregar partida" do
+  painel da direita. A partida volta no começo da vez em que foi salva.

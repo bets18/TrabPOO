@@ -41,6 +41,9 @@ class PainelJogador extends JPanel implements ObservadorIF {
     private final JButton botaoPilha = new JButton("Melhoria do topo da pilha");
     private final JButton botaoHabilidade = new JButton("Trocar 1 cavalo por 1 espada");
     private final JButton botaoPassarVez = new JButton("Passar a vez");
+    private final JButton botaoSalvar = new JButton("Salvar partida");
+    private final JButton botaoCarregar = new JButton("Carregar partida");
+    private String aviso = null; // partida salva/carregada ou erro de arquivo; some na próxima mudança
     private final Faixa faixa = new Faixa();
     private final Informacoes informacoes = new Informacoes();
     private final JPanel botoes = new JPanel(new GridLayout(0, 1, 0, 6));
@@ -84,12 +87,30 @@ class PainelJogador extends JPanel implements ObservadorIF {
             }
         });
         botaoPassarVez.setFont(new Font("SansSerif", Font.BOLD, 16));
+        botaoSalvar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                acoes.salvarPartidaClicado();
+            }
+        });
+        botaoCarregar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                acoes.carregarPartidaClicado();
+            }
+        });
+        botaoSalvar.setToolTipText("Só no começo da vez, antes de ativar a coluna");
+        JPanel arquivo = new JPanel(new GridLayout(1, 2, 6, 0));
+        arquivo.setOpaque(false);
+        arquivo.add(botaoSalvar);
+        arquivo.add(botaoCarregar);
 
         botoes.setOpaque(false);
         botoes.setBorder(BorderFactory.createEmptyBorder(6, 20, 12, 20));
         botoes.add(botaoCartela);
         botoes.add(botaoCartas);
         botoes.add(botaoPilha);
+        botoes.add(arquivo);
         botoes.add(botaoPassarVez);
         add(botoes, BorderLayout.SOUTH);
 
@@ -99,12 +120,28 @@ class PainelJogador extends JPanel implements ObservadorIF {
 
     @Override
     public void notificar(ObservadoIF observado) {
+        int evento = observado.get(HerdeirosDeKhanAPI.ULTIMO_EVENTO);
+        if (evento == HerdeirosDeKhanAPI.EVENTO_PARTIDA_SALVA) {
+            aviso = "Partida salva. Ela continua daqui";
+        } else if (evento == HerdeirosDeKhanAPI.EVENTO_PARTIDA_CARREGADA) {
+            aviso = "Partida carregada";
+        } else if (evento != HerdeirosDeKhanAPI.EVENTO_JANELA_DA_CARTELA
+                && evento != HerdeirosDeKhanAPI.EVENTO_JANELA_DE_CARTAS) {
+            aviso = null; // abrir uma janela não apaga o aviso; uma jogada, sim
+        }
         atualizar();
+    }
+
+    // chamado pela JanelaJogo quando o Controller tem algo a dizer (ex: erro ao ler o arquivo)
+    void avisar(String texto) {
+        aviso = texto;
+        repaint();
     }
 
     private void atualizar() {
         boolean emJogo = !modelo.isJogoTerminado();
         botaoPassarVez.setEnabled(emJogo && modelo.podePassarVez());
+        botaoSalvar.setEnabled(modelo.podeSalvar());
         botaoPilha.setText(modelo.isMelhoriaGratisPendente() ? "Melhoria grátis do topo da pilha"
                 : "Comprar melhoria do topo da pilha (2 moedas)");
         botaoPilha.setEnabled(emJogo && modelo.getTamanhoDaPilhaDeMelhorias() > 0);
@@ -185,10 +222,11 @@ class PainelJogador extends JPanel implements ObservadorIF {
             g2.fillRect(0, 0, getWidth(), getHeight());
             g2.setColor(Color.WHITE);
             g2.setFont(new Font("SansSerif", Font.BOLD, 26));
-            g2.drawString("Vez de " + EstiloJogador.getNome(herdeiro), 14, 36);
+            g2.drawString("Vez de " + modelo.getNomeDoJogadorDaVez(), 14, 36);
             g2.setFont(new Font("SansSerif", Font.PLAIN, 15));
             String rodada = modelo.isUltimaRodada() ? "  -  última rodada!" : "";
-            g2.drawString("Jogador " + (jogador + 1) + " de " + modelo.getNumeroDeJogadores() + rodada, 14, 60);
+            g2.drawString(EstiloJogador.getNome(herdeiro) + "  -  jogador " + (jogador + 1) + " de "
+                    + modelo.getNumeroDeJogadores() + rodada, 14, 60);
 
             g2.setFont(new Font("SansSerif", Font.BOLD, 16));
             int y = 88;
@@ -204,7 +242,7 @@ class PainelJogador extends JPanel implements ObservadorIF {
                 g2.drawString("Peão " + (modelo.getPeaoAtivo(jogador) + 1) + " ativo (clique no outro para trocar)", 14, y + 30);
             }
             g2.setFont(new Font("SansSerif", Font.ITALIC, 13));
-            g2.drawString("Botão direito numa parada: construir yurt", 14, getHeight() - 8);
+            g2.drawString(aviso != null ? aviso : "Botão direito numa parada: construir yurt", 14, getHeight() - 8);
         }
     }
 
@@ -238,7 +276,7 @@ class PainelJogador extends JPanel implements ObservadorIF {
                     posicoes.append(" e ").append(modelo.getPosicaoDoPeao(i, peao));
                 }
                 String marca = i == modelo.getIndiceJogadorDaVez() ? " (da vez)" : "";
-                g2.drawString(EstiloJogador.getNome(herdeiro) + ": " + modelo.getVotos(i) + " votos, em "
+                g2.drawString(modelo.getNomeDoJogador(i) + ": " + modelo.getVotos(i) + " votos, em "
                         + posicoes + marca, 40, y);
             }
 

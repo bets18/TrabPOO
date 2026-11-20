@@ -48,4 +48,10 @@ public interface AcoesDoJogador {
     void verCartasClicado();
 
     void passarVezClicado();
+
+    // gravar a partida num arquivo (só no começo da vez)
+    void salvarPartidaClicado();
+
+    // trocar a partida atual por uma salva em arquivo
+    void carregarPartidaClicado();
 }

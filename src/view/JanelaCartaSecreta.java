@@ -30,13 +30,13 @@ public class JanelaCartaSecreta extends JDialog {
     private final List<String> cartas;
     private String escolhida = null;
 
-    private JanelaCartaSecreta(String herdeiro, List<String> cartas) {
+    private JanelaCartaSecreta(String nomeDoJogador, String herdeiro, List<String> cartas) {
         super((java.awt.Frame) null, "Carta de conselheiro secreto", true);
         this.cartas = cartas;
         // só fecha escolhendo uma das cartas
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
-        JLabel titulo = new JLabel("<html>Vez de <b>" + EstiloJogador.getNome(herdeiro) + "</b>: clique na carta que vai "
+        JLabel titulo = new JLabel("<html>Vez de <b>" + EstiloJogador.getRotulo(nomeDoJogador, herdeiro) + "</b>: clique na carta que vai "
                 + "ficar com você (a outra é descartada). Ela pode dar até 3 votos no fim do jogo.</html>");
         titulo.setFont(new Font("SansSerif", Font.PLAIN, 15));
         titulo.setForeground(EstiloJogador.getCor(herdeiro));
@@ -56,8 +56,8 @@ public class JanelaCartaSecreta extends JDialog {
     }
 
     // abre a janela e espera a escolha
-    public static String escolher(String herdeiro, List<String> cartas) {
-        JanelaCartaSecreta janela = new JanelaCartaSecreta(herdeiro, cartas);
+    public static String escolher(String nomeDoJogador, String herdeiro, List<String> cartas) {
+        JanelaCartaSecreta janela = new JanelaCartaSecreta(nomeDoJogador, herdeiro, cartas);
         janela.setVisible(true);
         return janela.escolhida;
     }

@@ -81,14 +81,22 @@ class Jogo {
     private Conselheiro conselheiroSelecionado = null;
     private final List<TipoTesouro> entregaEmMontagem = new ArrayList<>();
 
-    // a lista já vem na ordem de jogo
+    // a lista já vem na ordem de jogo; cada jogador fica com o nome do herdeiro
     Jogo(Tabuleiro tabuleiro, List<Herdeiro> herdeirosNaOrdemDeJogo) {
+        this(tabuleiro, herdeirosNaOrdemDeJogo, null);
+    }
+
+    // nomes na mesma ordem dos herdeiros (null = todos com o nome do herdeiro)
+    Jogo(Tabuleiro tabuleiro, List<Herdeiro> herdeirosNaOrdemDeJogo, List<String> nomes) {
         if (herdeirosNaOrdemDeJogo.size() < MIN_JOGADORES || herdeirosNaOrdemDeJogo.size() > MAX_JOGADORES) {
             throw new IllegalArgumentException("O jogo deve ter de 2 a 5 jogadores.");
         }
         // cada herdeiro é uma cor, não dá pra repetir
         if (new HashSet<>(herdeirosNaOrdemDeJogo).size() != herdeirosNaOrdemDeJogo.size()) {
             throw new IllegalArgumentException("Cada herdeiro só pode aparecer uma vez.");
+        }
+        if (nomes != null && nomes.size() != herdeirosNaOrdemDeJogo.size()) {
+            throw new IllegalArgumentException("Cada jogador tem que ter um nome.");
         }
         if (tabuleiro.getKarakorum() == null) {
             throw new IllegalStateException("O tabuleiro precisa ter Karakorum.");
@@ -99,7 +107,7 @@ class Jogo {
         reserva.put(TipoTributo.MOEDA, 15);
 
         for (int i = 0; i < herdeirosNaOrdemDeJogo.size(); i++) {
-            Jogador jogador = new Jogador(herdeirosNaOrdemDeJogo.get(i));
+            Jogador jogador = new Jogador(herdeirosNaOrdemDeJogo.get(i), nomes == null ? null : nomes.get(i));
             // os dois primeiros começam com 1 moeda, o resto com 2
             darDaReserva(jogador, TipoTributo.MOEDA, i < 2 ? 1 : 2);
             for (int peao = 0; peao < jogador.getNumeroDePeoes(); peao++) {
@@ -189,6 +197,89 @@ class Jogo {
         for (int i = 0; i < conselheiros.size() && i < bonus.size(); i++) {
             conselheiros.get(i).colocarBonus(bonus.get(i));
         }
+    }
+
+    //  salvar e carregar (classe Salvamento)
+
+    // só dá pra salvar no começo da vez, antes de ativar a coluna e de fazer qualquer ação:
+    // assim o arquivo não precisa guardar o que só vale durante o turno
+    boolean podeSalvar() {
+        return !terminado && cartasSecretasEscolhidas() && colunaDoTurno == null && !peaoTravado
+                && movimentosRestantes == 0 && punhosRestantes == 0 && compradasNoTurno.isEmpty()
+                && linhasComMelhoriaGratis.isEmpty() && tesourosParaEscolher.isEmpty();
+    }
+
+    List<Cidade> getTodasAsCidades() {
+        return new ArrayList<>(todasAsCidades);
+    }
+
+    // na ordem em que vão ser reveladas
+    List<Cidade> getCidadesOcultas() {
+        return new ArrayList<>(cidadesOcultas);
+    }
+
+    List<TipoTesouro> getPilhaDeTesouros() {
+        return new ArrayList<>(pilhaDeTesouros);
+    }
+
+    boolean isPartidaComecou() {
+        return partidaComecou;
+    }
+
+    boolean isFimDisparado() {
+        return fimDisparado;
+    }
+
+    // os métodos abaixo só são usados ao carregar uma partida salva, pra trocar o que a
+    // preparação fez pelo que estava no arquivo
+
+    void definirCidades(List<Cidade> todas, List<Cidade> ocultas, List<TipoTesouro> tesouros) {
+        todasAsCidades.clear();
+        todasAsCidades.addAll(todas);
+        cidadesOcultas.clear();
+        cidadesOcultas.addAll(ocultas);
+        pilhaDeTesouros = new ArrayList<>(tesouros);
+    }
+
+    void definirAreaDeMelhorias(AreaDeMelhorias area) {
+        areaDeMelhorias = area;
+    }
+
+    void definirCartasAbertas(List<CartaAberta> abertas) {
+        cartasAbertas.clear();
+        cartasAbertas.addAll(abertas);
+    }
+
+    // provincia null = khan na área de melhorias (se naAreaDeMelhorias) ou fora do tabuleiro
+    void definirKhan(Provincia provincia, boolean naAreaDeMelhorias) {
+        if (provincia != null && (naAreaDeMelhorias || !provincia.isDoKhan())) {
+            throw new IllegalArgumentException("Posição do Khan inválida.");
+        }
+        provinciaDoKhan = provincia;
+        khanNaAreaDeMelhorias = naAreaDeMelhorias;
+    }
+
+    void definirReserva(TipoTributo tipo, int quantidade) {
+        if (quantidade < 0) {
+            throw new IllegalArgumentException("Reserva não pode ser negativa.");
+        }
+        reserva.put(tipo, quantidade);
+    }
+
+    void definirAndamento(int votosNoConselho, boolean partidaComecou, boolean fimDisparado, boolean ultimaRodada) {
+        this.votosNoConselho = votosNoConselho;
+        this.partidaComecou = partidaComecou;
+        this.fimDisparado = fimDisparado;
+        this.ultimaRodada = ultimaRodada;
+    }
+
+    // chamado por último, com os peões já no lugar: a vez volta pro começo do turno desse jogador
+    void retomarNaVezDe(int indiceJogador) {
+        if (indiceJogador < 0 || indiceJogador >= jogadores.size()) {
+            throw new IllegalArgumentException("Jogador da vez inválido.");
+        }
+        indiceJogadorDaVez = indiceJogador;
+        iniciarTurno();
     }
 
     //  consultas

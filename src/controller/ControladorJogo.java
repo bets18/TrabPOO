@@ -7,35 +7,57 @@ import view.AcoesDoJogador;
 import view.JanelaCartaSecreta;
 import view.JanelaInicial;
 import view.JanelaJogo;
+import view.SeletorDeArquivo;
 
-// organiza a sequência da partida: escolha dos herdeiros, das cartas secretas e depois os
-// turnos. Recebe os cliques da View, decide qual jogada do Model eles significam no momento
+// organiza a sequência da partida: nomes e herdeiros dos jogadores (ou uma partida salva),
+// escolha das cartas secretas e depois os turnos. Recebe os cliques da View, decide qual jogada do Model eles significam no momento
 // e pede ao Model. Não redesenha nada: quem atualiza a tela são as janelas, que observam o
 // Model. Jogada inválida não faz nada (sem mensagem), como o enunciado pede
 public class ControladorJogo implements AcoesDoJogador {
     private final HerdeirosDeKhanAPI modelo = HerdeirosDeKhanAPI.getInstancia();
+    private JanelaJogo janela = null;
 
     // sem herdeiros pelos argumentos, abre a janela inicial pra escolher
     public void iniciar(List<String> herdeirosPelosArgumentos) {
-        List<String> herdeiros = herdeirosPelosArgumentos;
-        if (herdeiros == null || herdeiros.isEmpty()) {
-            herdeiros = JanelaInicial.escolherHerdeiros();
-            if (herdeiros == null) {
-                System.exit(0); // fecharam a janela inicial
-            }
-        }
-        modelo.novaPartida(herdeiros);
-
-        // antes da 1ª rodada cada um fica com 1 das 2 cartas de conselheiro secreto
-        for (int i = 0; i < modelo.getNumeroDeJogadores(); i++) {
-            String carta = JanelaCartaSecreta.escolher(modelo.getHerdeiro(i), modelo.getCartasSecretasOferecidas(i));
-            modelo.escolherCartaSecreta(i, carta);
+        if (herdeirosPelosArgumentos == null || herdeirosPelosArgumentos.isEmpty()) {
+            prepararPelaJanelaInicial();
+        } else {
+            modelo.novaPartida(herdeirosPelosArgumentos);
+            escolherCartasSecretas();
         }
 
-        JanelaJogo janela = new JanelaJogo(this);
+        janela = new JanelaJogo(this);
         janela.setVisible(true);
         // 1º passo do turno: a cartela aparece pra escolher a coluna
         modelo.exibirCartela();
+    }
+
+    // a janela inicial volta enquanto o arquivo escolhido não puder ser carregado
+    private void prepararPelaJanelaInicial() {
+        String aviso = null;
+        while (!modelo.temPartida()) {
+            JanelaInicial inicial = JanelaInicial.abrir(aviso);
+            if (inicial.getArquivoParaCarregar() != null) {
+                // a partida salva já tem as cartas secretas escolhidas
+                if (!modelo.carregarPartida(inicial.getArquivoParaCarregar())) {
+                    aviso = "Esse arquivo não é uma partida salva válida";
+                }
+            } else if (inicial.isConfirmada()) {
+                modelo.novaPartida(inicial.getHerdeiros(), inicial.getNomes());
+                escolherCartasSecretas();
+            } else {
+                System.exit(0); // fecharam a janela inicial
+            }
+        }
+    }
+
+    // antes da 1ª rodada cada um fica com 1 das 2 cartas de conselheiro secreto
+    private void escolherCartasSecretas() {
+        for (int i = 0; i < modelo.getNumeroDeJogadores(); i++) {
+            String carta = JanelaCartaSecreta.escolher(modelo.getNomeDoJogador(i), modelo.getHerdeiro(i),
+                    modelo.getCartasSecretasOferecidas(i));
+            modelo.escolherCartaSecreta(i, carta);
+        }
     }
 
     //  cartela
@@ -172,5 +194,33 @@ public class ControladorJogo implements AcoesDoJogador {
     @Override
     public void passarVezClicado() {
         modelo.passarVez();
+    }
+
+    //  salvar e carregar
+
+    // o Model só deixa salvar no começo da vez; a View escolhe o arquivo e o Model grava
+    @Override
+    public void salvarPartidaClicado() {
+        if (!modelo.podeSalvar()) {
+            return;
+        }
+        String caminho = SeletorDeArquivo.escolherParaSalvar(janela);
+        if (caminho != null && !modelo.salvarPartida(caminho)) {
+            janela.avisar("Não foi possível gravar o arquivo");
+        }
+    }
+
+    // a partida do arquivo entra no lugar da atual e continua do começo da vez em que foi salva
+    @Override
+    public void carregarPartidaClicado() {
+        String caminho = SeletorDeArquivo.escolherParaAbrir(janela);
+        if (caminho == null) {
+            return;
+        }
+        if (modelo.carregarPartida(caminho)) {
+            modelo.exibirCartela();
+        } else {
+            janela.avisar("Esse arquivo não é uma partida salva válida");
+        }
     }
 }
