@@ -10,7 +10,7 @@ CLASSE COM O MÉTODO MAIN
   controller.Principal  (arquivo src/controller/Principal.java)
 
 VÍDEO DE APRESENTAÇÃO
-  (PREENCHER com o link do Google Drive ou Dropbox)
+  https://drive.google.com/file/d/1qNvV-vV9C3VPQqNxvJ_n5NBxIALrjZme/view?usp=sharing
 
 COMO EXECUTAR
   No Eclipse: botão direito em src/controller/Principal.java > Run As > Java Application.
