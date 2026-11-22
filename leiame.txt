@@ -1,28 +1,13 @@
-INF1636 - Programação Orientada a Objetos - 2026.2
-Trabalho: Herdeiros de Khan
+Trabalho de INF1636 - Herdeiros de Khan
 
-GRUPO
-  Lis Almeida    - matrícula: 2421294
-  Rafaela Bessa  - matrícula: 2420043
-  Davi Rangel    - matrícula: 2411930
+Grupo:
+Lis Almeida - 2421294
+Rafaela Bessa - 2420043
+Davi Rangel - 2411930
 
-CLASSE COM O MÉTODO MAIN
-  controller.Principal  (arquivo src/controller/Principal.java)
+Classe com o main: controller.Principal
 
-VÍDEO DE APRESENTAÇÃO
-  https://drive.google.com/file/d/1qNvV-vV9C3VPQqNxvJ_n5NBxIALrjZme/view?usp=sharing
+Vídeo: https://drive.google.com/file/d/1qNvV-vV9C3VPQqNxvJ_n5NBxIALrjZme/view?usp=sharing
 
-COMO EXECUTAR
-  No Eclipse: botão direito em src/controller/Principal.java > Run As > Java Application.
-  O programa tem que rodar a partir da pasta do projeto (é o padrão do Eclipse), porque as
-  imagens são lidas da pasta "assets".
-
-COMO RODAR OS TESTES
-  Os testes são JUnit 4 e ficam na pasta "teste".
-  No Eclipse: botão direito na pasta teste > Run As > JUnit Test.
-
-SALVAR E CONTINUAR UMA PARTIDA
-  Salvar: botão "Salvar partida" do painel da direita. Só fica ligado no começo da vez de um
-  jogador, antes de ele ativar a coluna. A partida é gravada num arquivo texto (.txt).
-  Continuar: botão "Continuar partida salva..." da janela inicial ou "Carregar partida" do
-  painel da direita. A partida volta no começo da vez em que foi salva.
+Obs: rodar pelo Eclipse a partir da pasta do projeto, porque as imagens ficam na pasta assets.
+Os testes (JUnit 4) estão na pasta teste.
